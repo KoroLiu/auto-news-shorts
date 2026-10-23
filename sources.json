@@ -1,0 +1,478 @@
+{
+  "_说明": "信息源清单。kind: official=官方一手, media=科技媒体, aggregator=热度聚合, community=社区讨论, trending=热榜。aiOnly=true 表示该源全是AI内容，否则按关键词过滤。enabled 改成 false 即可停用。 techWide=true 表示这个综合科技来源里和 AI 无关、但够大的科技新闻也收（只有板块设了 nonAI 才收）；sameOutlet=同一家网站的另一个订阅（同一篇文章两边都有时只算一个来源）。",
+  "sources": [
+    {
+      "id": "x",
+      "name": "X 官方账号",
+      "type": "x_accounts",
+      "kind": "official",
+      "lang": "en",
+      "enabled": true,
+      "_说明": "通过 Agent-Reach 的 OpenCLI 用你自己已登录 X 的 Chrome 读取（安装见 docs/setup.md）。chromeProfileName 填你登录了 X 的 Chrome 个人资料名（可留空用默认资料）；profile 是 OpenCLI 的浏览器配置名（可留空）。如果运行时 Chrome 没开，程序会自动打开那个个人资料。kind=community 表示个人/爆料账号（只当线索）。",
+      "profile": "",
+      "chromeProfileName": "",
+      "autoOpenChrome": true,
+      "limit": 15,
+      "concurrency": 2,
+      "timeoutSec": 60,
+      "accounts": [
+        {
+          "handle": "OpenAI",
+          "name": "OpenAI"
+        },
+        {
+          "handle": "OpenAIDevs",
+          "name": "OpenAI Developers"
+        },
+        {
+          "handle": "ChatGPT",
+          "name": "ChatGPT"
+        },
+        {
+          "handle": "AnthropicAI",
+          "name": "Anthropic"
+        },
+        {
+          "handle": "claudeai",
+          "name": "Claude"
+        },
+        {
+          "handle": "GoogleDeepMind",
+          "name": "Google DeepMind"
+        },
+        {
+          "handle": "GoogleAI",
+          "name": "Google AI"
+        },
+        {
+          "handle": "GeminiApp",
+          "name": "Gemini"
+        },
+        {
+          "handle": "OfficialLoganK",
+          "name": "Logan Kilpatrick（Google AI Studio）",
+          "kind": "community"
+        },
+        {
+          "handle": "SpaceXSI",
+          "name": "SpaceX Super Intelligence（原 xAI：@xai → @SpaceXAI → @SpaceXSI）"
+        },
+        {
+          "handle": "AIatMeta",
+          "name": "AI at Meta"
+        },
+        {
+          "handle": "MistralAI",
+          "name": "Mistral AI"
+        },
+        {
+          "handle": "perplexity_ai",
+          "name": "Perplexity"
+        },
+        {
+          "handle": "cursor_ai",
+          "name": "Cursor"
+        },
+        {
+          "handle": "huggingface",
+          "name": "Hugging Face"
+        },
+        {
+          "handle": "NVIDIAAI",
+          "name": "NVIDIA AI"
+        },
+        {
+          "handle": "sama",
+          "name": "Sam Altman",
+          "kind": "community"
+        },
+        {
+          "handle": "thsottiaux",
+          "name": "Tibo（Codex 负责人）",
+          "kind": "community"
+        },
+        {
+          "handle": "karpathy",
+          "name": "Andrej Karpathy",
+          "kind": "community"
+        },
+        {
+          "handle": "kimi_moonshot",
+          "name": "Kimi（月之暗面）"
+        },
+        {
+          "handle": "deepseek_ai",
+          "name": "DeepSeek"
+        },
+        {
+          "handle": "Alibaba_Qwen",
+          "name": "通义千问 Qwen"
+        },
+        {
+          "handle": "Zai_org",
+          "name": "智谱 Z.ai"
+        },
+        {
+          "handle": "MiniMax_AI",
+          "name": "MiniMax"
+        },
+        {
+          "handle": "TencentHunyuan",
+          "name": "腾讯混元"
+        },
+        {
+          "handle": "StepFun_ai",
+          "name": "阶跃星辰"
+        },
+        {
+          "handle": "XiaomiMiMo",
+          "name": "小米 MiMo"
+        },
+        {
+          "handle": "Kling_ai",
+          "name": "可灵 Kling"
+        },
+        {
+          "handle": "testingcatalog",
+          "name": "TestingCatalog（爆料）",
+          "kind": "community"
+        },
+        {
+          "handle": "ArtificialAnlys",
+          "name": "Artificial Analysis（评测榜）",
+          "kind": "community"
+        }
+      ]
+    },
+    {
+      "id": "hn",
+      "name": "Hacker News",
+      "type": "hn",
+      "kind": "community",
+      "lang": "en",
+      "enabled": true,
+      "techWide": true
+    },
+    {
+      "id": "reddit",
+      "name": "Reddit",
+      "type": "reddit",
+      "kind": "community",
+      "lang": "en",
+      "enabled": true,
+      "_说明": "和 X 一样，通过 Agent-Reach 的 OpenCLI 用你已登录 Reddit 的 Chrome 读取（Reddit 不让匿名访问）。每个版块取当天最热的帖子。",
+      "profile": "",
+      "limit": 15,
+      "concurrency": 2,
+      "subs": [
+        "LocalLLaMA",
+        "singularity",
+        "OpenAI",
+        "ClaudeAI",
+        "MachineLearning",
+        "artificial",
+        "ChatGPT",
+        "Bard"
+      ]
+    },
+    {
+      "id": "gh-trending",
+      "name": "GitHub Trending",
+      "type": "github_trending",
+      "kind": "trending",
+      "lang": "en",
+      "enabled": true
+    },
+    {
+      "id": "gh-trending-weekly",
+      "name": "GitHub Trending 本周热榜",
+      "type": "github_trending",
+      "since": "weekly",
+      "kind": "trending",
+      "lang": "en",
+      "enabled": true,
+      "_说明": "每周 GitHub 项目板块的主来源：github.com/trending?since=weekly，带「本周涨星」。"
+    },
+    {
+      "id": "gh-daily-archive",
+      "name": "GitHub 每日热榜存档（最近 7 天）",
+      "type": "github_archive",
+      "days": 7,
+      "kind": "trending",
+      "lang": "en",
+      "enabled": true,
+      "_说明": "每天采集时（不管做哪个板块）程序都会顺便把当天的 GitHub 每日热榜存到 runs\\_github-daily\\日期.json；这里把最近 7 天的合并起来，补上本周热榜漏掉的项目。"
+    },
+    {
+      "id": "hf-trending",
+      "name": "Hugging Face 热门模型",
+      "type": "hf_trending",
+      "kind": "trending",
+      "lang": "en",
+      "enabled": true
+    },
+    {
+      "id": "hf-papers",
+      "name": "Hugging Face 每日论文",
+      "type": "hf_papers",
+      "kind": "trending",
+      "lang": "en",
+      "enabled": true
+    },
+    {
+      "id": "hf-orgs",
+      "name": "Hugging Face 官方模型主页",
+      "type": "hf_orgs",
+      "kind": "official",
+      "lang": "en",
+      "enabled": true,
+      "orgs": [
+        "Qwen",
+        "deepseek-ai",
+        "zai-org",
+        "moonshotai",
+        "MiniMaxAI",
+        "tencent",
+        "ByteDance-Seed",
+        "baidu",
+        "stepfun-ai",
+        "XiaomiMiMo",
+        "meituan-longcat",
+        "openbmb",
+        "internlm",
+        "openai",
+        "google",
+        "meta-llama",
+        "mistralai",
+        "nvidia",
+        "microsoft",
+        "ibm-granite",
+        "allenai",
+        "black-forest-labs"
+      ],
+      "_说明": "各大模型公司在 Hugging Face（放 AI 模型的网站）上的官方主页，程序找最近 48 小时新上传的模型；和 X（推特）无关。"
+    },
+    {
+      "id": "smolai",
+      "name": "AINews (smol.ai)",
+      "type": "digest",
+      "url": "https://news.smol.ai/rss.xml",
+      "kind": "aggregator",
+      "lang": "en",
+      "aiOnly": true,
+      "enabled": true
+    },
+    {
+      "id": "techmeme",
+      "name": "Techmeme",
+      "type": "rss",
+      "url": "https://www.techmeme.com/feed.xml",
+      "kind": "aggregator",
+      "lang": "en",
+      "enabled": true,
+      "techWide": true
+    },
+    {
+      "id": "openai",
+      "name": "OpenAI 官方",
+      "type": "rss",
+      "url": "https://openai.com/news/rss.xml",
+      "kind": "official",
+      "lang": "en",
+      "aiOnly": true,
+      "enabled": true
+    },
+    {
+      "id": "anthropic",
+      "name": "Anthropic 官方",
+      "type": "anthropic_news",
+      "url": "https://www.anthropic.com/news",
+      "kind": "official",
+      "lang": "en",
+      "aiOnly": true,
+      "enabled": true
+    },
+    {
+      "id": "google-ai",
+      "name": "Google AI 官方",
+      "type": "rss",
+      "url": "https://blog.google/innovation-and-ai/technology/ai/rss/",
+      "kind": "official",
+      "lang": "en",
+      "aiOnly": true,
+      "enabled": true
+    },
+    {
+      "id": "deepmind",
+      "name": "Google DeepMind",
+      "type": "rss",
+      "url": "https://deepmind.google/blog/rss.xml",
+      "kind": "official",
+      "lang": "en",
+      "aiOnly": true,
+      "enabled": true
+    },
+    {
+      "id": "nvidia",
+      "name": "NVIDIA 官方博客",
+      "type": "rss",
+      "url": "https://blogs.nvidia.com/feed/",
+      "kind": "official",
+      "lang": "en",
+      "enabled": true
+    },
+    {
+      "id": "github-blog",
+      "name": "GitHub 官方博客",
+      "type": "rss",
+      "url": "https://github.blog/ai-and-ml/feed/",
+      "kind": "official",
+      "lang": "en",
+      "aiOnly": true,
+      "enabled": true
+    },
+    {
+      "id": "hf-blog",
+      "name": "Hugging Face 博客",
+      "type": "rss",
+      "url": "https://huggingface.co/blog/feed.xml",
+      "kind": "official",
+      "lang": "en",
+      "aiOnly": true,
+      "enabled": true
+    },
+    {
+      "id": "claude-code",
+      "name": "Claude Code 版本",
+      "type": "rss",
+      "url": "https://github.com/anthropics/claude-code/releases.atom",
+      "kind": "release",
+      "lang": "en",
+      "aiOnly": true,
+      "enabled": true
+    },
+    {
+      "id": "codex",
+      "name": "Codex 版本",
+      "type": "rss",
+      "url": "https://github.com/openai/codex/releases.atom",
+      "kind": "release",
+      "lang": "en",
+      "aiOnly": true,
+      "enabled": true
+    },
+    {
+      "id": "gemini-cli",
+      "name": "Gemini CLI 版本",
+      "type": "rss",
+      "url": "https://github.com/google-gemini/gemini-cli/releases.atom",
+      "kind": "release",
+      "lang": "en",
+      "aiOnly": true,
+      "enabled": true
+    },
+    {
+      "id": "simonw",
+      "name": "Simon Willison",
+      "type": "rss",
+      "url": "https://simonwillison.net/atom/everything/",
+      "kind": "community",
+      "lang": "en",
+      "aiOnly": true,
+      "enabled": true
+    },
+    {
+      "id": "verge-ai",
+      "name": "The Verge AI",
+      "type": "rss",
+      "url": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+      "kind": "media",
+      "lang": "en",
+      "aiOnly": true,
+      "enabled": true
+    },
+    {
+      "id": "techcrunch-ai",
+      "name": "TechCrunch AI",
+      "type": "rss",
+      "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+      "kind": "media",
+      "lang": "en",
+      "aiOnly": true,
+      "enabled": true
+    },
+    {
+      "id": "arstechnica-ai",
+      "name": "Ars Technica AI",
+      "type": "rss",
+      "url": "https://arstechnica.com/ai/feed/",
+      "kind": "media",
+      "lang": "en",
+      "aiOnly": true,
+      "enabled": true
+    },
+    {
+      "id": "arstechnica-all",
+      "name": "Ars Technica",
+      "type": "rss",
+      "url": "https://feeds.arstechnica.com/arstechnica/index",
+      "kind": "media",
+      "lang": "en",
+      "techWide": true,
+      "sameOutlet": "arstechnica-ai",
+      "enabled": true,
+      "_说明": "Ars Technica 全站（网络安全、芯片、航天报道多）；和 Ars AI 频道是同一家，同一篇只算一个来源"
+    },
+    {
+      "id": "theregister",
+      "name": "The Register",
+      "type": "rss",
+      "url": "https://www.theregister.com/headlines.atom",
+      "kind": "media",
+      "lang": "en",
+      "techWide": true,
+      "enabled": true,
+      "_说明": "英国老牌科技媒体，网络安全、企业 IT 报道快"
+    },
+    {
+      "id": "mittr-ai",
+      "name": "MIT Technology Review",
+      "type": "rss",
+      "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed",
+      "kind": "media",
+      "lang": "en",
+      "aiOnly": true,
+      "enabled": true
+    },
+    {
+      "id": "qbitai",
+      "name": "量子位",
+      "type": "rss",
+      "url": "https://www.qbitai.com/feed",
+      "kind": "media",
+      "lang": "zh",
+      "aiOnly": true,
+      "enabled": true
+    },
+    {
+      "id": "ithome",
+      "name": "IT之家",
+      "type": "rss",
+      "url": "https://www.ithome.com/rss/",
+      "kind": "media",
+      "lang": "zh",
+      "enabled": true,
+      "techWide": true
+    },
+    {
+      "id": "36kr",
+      "name": "36氪",
+      "type": "rss",
+      "url": "https://www.36kr.com/feed",
+      "kind": "media",
+      "lang": "zh",
+      "enabled": true,
+      "techWide": true
+    }
+  ]
+}

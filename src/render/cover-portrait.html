@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<!-- 竖版封面（3:4，1080×1440）：抖音竖封面、快手、小红书、视频号个人主页卡片用。手机格子很小，所以字大、字少、居中。 -->
+<style>
+  :root{--ink:#122039;--blue:#2F6BFF;--deep:#1C4FD6;--muted:#6C7C98;--line:#E3ECFB;
+    --font:"HarmonyOS Sans SC","MiSans","Source Han Sans SC","Noto Sans SC","Noto Sans CJK SC","Microsoft YaHei UI","Microsoft YaHei","PingFang SC",sans-serif;
+    --mono:"JetBrains Mono","Cascadia Mono","Cascadia Code","Consolas",monospace;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:1080px;height:1440px;overflow:hidden;font-family:var(--font);background:#F4F8FF;color:var(--ink)}
+  #c{position:absolute;inset:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;
+     background:radial-gradient(700px 600px at 100% 0%, #D6E5FF 0%, rgba(214,229,255,0) 70%),
+                radial-gradient(700px 600px at 0% 100%, #E1ECFF 0%, rgba(225,236,255,0) 70%),
+                linear-gradient(170deg,#FAFCFF 0%,#EEF4FF 100%)}
+  .dots{position:absolute;inset:0;background-image:radial-gradient(rgba(47,107,255,.10) 2px, transparent 2.2px);background-size:40px 40px;pointer-events:none}
+  .tag{display:inline-flex;align-items:center;gap:14px;background:var(--blue);color:#fff;font-weight:800;font-size:40px;padding:14px 34px;border-radius:999px;box-shadow:0 12px 28px rgba(47,107,255,.30);letter-spacing:2px}
+  .tag i{width:14px;height:14px;border-radius:50%;background:#fff;opacity:.9}
+  .date{font-family:var(--mono);font-weight:700;letter-spacing:4px;color:var(--ink)}
+  .logo{flex:none;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;
+        box-shadow:0 14px 34px rgba(30,70,160,.13);border:3px solid var(--line)}
+  .logo img{width:56%;height:56%;object-fit:contain}
+  .logo.photo img{width:100%;height:100%;object-fit:cover}
+  .logo .mono{font-weight:900;color:#fff;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3C7BFF,#1C4FD6)}
+  .mini{display:grid;grid-template-columns:1fr 1fr;gap:10%;width:100%;height:100%;padding:16%;background:#fff}
+  .mini .logo{width:100%;height:100%;box-shadow:none;border-width:2px}
+  .head{font-weight:900;text-align:center;line-height:1.18;letter-spacing:1px;text-wrap:balance}
+  .more{font-size:40px;font-weight:700;color:var(--muted);letter-spacing:2px}
+  .more b{color:var(--blue)}
+
+  /* A：logo 墙（参考橘鸦 Juya） */
+  .A .top{margin-top:120px;display:flex;flex-direction:column;align-items:center;gap:36px}
+  .A .date{font-size:78px}
+  .A .wall{margin-top:70px;display:grid;gap:44px;justify-content:center}
+  .A .bottom{position:absolute;left:70px;right:70px;bottom:120px;display:flex;flex-direction:column;align-items:center;gap:30px}
+  .A .head{font-size:112px}
+
+  /* B：大日期 + 清单 */
+  .B{align-items:stretch !important;padding:0 80px}
+  .B .top{margin-top:110px;display:flex;align-items:flex-end;justify-content:space-between}
+  .B .big{font-family:var(--mono);font-weight:800;font-size:180px;line-height:.9;color:var(--deep);letter-spacing:-4px}
+  .B .side{display:flex;flex-direction:column;align-items:flex-end;gap:22px;padding-bottom:10px}
+  .B .side .wk{font-size:44px;font-weight:800;color:var(--blue)}
+  .B .rule{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--blue),rgba(47,107,255,.15));margin:56px 0 46px}
+  .B .list{display:flex;flex-direction:column;gap:34px}
+  .B .row{display:flex;align-items:center;gap:36px;background:#fff;border-radius:34px;padding:22px 34px 22px 22px;border:2px solid var(--line);box-shadow:0 12px 30px rgba(30,70,160,.09)}
+  .B .row .t{font-size:66px;font-weight:900;white-space:nowrap;letter-spacing:1px;flex:1;min-width:0;overflow:hidden;line-height:1.25}
+  .B .row .sub{flex:none;font-size:44px;font-weight:800;color:#E8A317;font-family:var(--mono)}
+  .tag{white-space:nowrap}
+  .B .foot{position:absolute;left:80px;right:80px;bottom:90px;text-align:center}
+
+  /* C：头条主角 */
+  .C .top{margin-top:110px;display:flex;align-items:center;gap:30px}
+  .C .date{font-size:60px}
+  .C .hero{margin-top:110px}
+  .C .head{margin-top:70px;font-size:124px;padding:0 70px}
+  .C .others{position:absolute;bottom:120px;display:flex;flex-direction:column;align-items:center;gap:34px}
+  .C .others .row{display:flex;gap:28px}
+</style>
+</head>
+<body>
+<div id="c"><div class="dots"></div></div>
+<script>
+function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+// 一个圆形 logo：有图标用图标，GitHub 头像铺满，都没有就用标题第一个字
+function logo(item, size){
+  const st = `width:${size}px;height:${size}px`;
+  const l = item?.logo;
+  if (l?.src) return `<div class="logo ${l.kind === 'photo' ? 'photo' : ''}" style="${st}"><img src="${esc(l.src)}"></div>`;
+  const ch = String(item?.mono || item?.title || '?').trim().charAt(0).toUpperCase();
+  return `<div class="logo" style="${st}"><div class="mono" style="font-size:${Math.round(size * .46)}px">${esc(ch)}</div></div>`;
+}
+// 同一家公司只放一次
+function uniq(items){ const seen = new Set(); return items.filter(it => { const k = it.logo?.id || it.title; if (seen.has(k)) return false; seen.add(k); return true; }); }
+// 字号缩到宽度不超过 max、行数不超过 lines（标题最多两行）
+function fit(el, max, lines, min){
+  let s = parseFloat(getComputedStyle(el).fontSize);
+  const over = () => { const lh = parseFloat(getComputedStyle(el).lineHeight) || s * 1.2;
+    return el.scrollWidth > Math.min(max, el.clientWidth || max) + 2 || el.getBoundingClientRect().height > lh * lines + 4; };
+  while (over() && s > min) { s -= 3; el.style.fontSize = s + 'px'; } }
+
+const VARIANTS = {
+  A(d){
+    const all = uniq(d.items);
+    let cells = all.slice(0, 6);
+    if (all.length > 6) cells = [...all.slice(0, 5), {group: all.slice(5, 9)}]; // 放不下的挤进最后一格，像 Juya 那样
+    const n = cells.length, cols = n <= 1 ? 1 : n <= 4 && n !== 3 ? 2 : n === 3 ? 3 : 3;
+    const size = n <= 2 ? 300 : n <= 4 && cols === 2 ? 250 : 230;
+    return `<div class="top"><div class="tag"><i></i>${esc(d.column)}</div><div class="date">${esc(d.dateISO)}</div></div>
+      <div class="wall" style="grid-template-columns:repeat(${cols},${size}px)">${cells.map(c => c.group
+        ? `<div class="logo" style="width:${size}px;height:${size}px"><div class="mini">${c.group.map(g => logo(g, 80)).join('')}</div></div>`
+        : logo(c, size)).join('')}</div>
+      <div class="bottom"><div class="head" data-fit="940" data-lines="2" style="max-width:940px">${esc(d.headline)}</div>
+        ${d.count > 1 ? `<div class="more">另有 <b>${d.count - 1}</b> ${esc(d.unit)}${esc(d.moreWord)}</div>` : ''}</div>`;
+  },
+  B(d){
+    const rows = d.items.slice(0, 6), n = rows.length, lg = Math.min(120, Math.floor((1440 - 470 - 110 - (n - 1) * 26) / n) - 44);
+    return `<div class="top"><div class="big">${esc(d.dateShort)}</div>
+        <div class="side"><div class="tag"><i></i>${esc(d.column)}</div><div class="wk">${esc(d.year)} · ${esc(d.weekday)}</div></div></div>
+      <div class="rule"></div>
+      <div class="list" style="gap:26px">${rows.map(r => `<div class="row">${logo(r, lg)}<div class="t" data-fit="${r.sub ? 560 : 730}">${esc(r.title)}</div>${r.sub ? `<div class="sub">${esc(r.sub)}</div>` : ''}</div>`).join('')}</div>
+      ${d.count > rows.length ? `<div class="foot more">共 <b>${d.count}</b> ${esc(d.unit)}</div>` : ''}`;
+  },
+  C(d){
+    const [first, ...rest] = d.items;
+    const others = uniq(rest).filter(r => (r.logo?.id || r.title) !== (first.logo?.id || first.title)).slice(0, 5);
+    return `<div class="top"><div class="tag"><i></i>${esc(d.column)}</div><div class="date">${esc(d.dateISO)}</div></div>
+      <div class="hero">${logo(first, 380)}</div>
+      <div class="head" data-fit="940" data-lines="2" style="max-width:940px">${esc(d.headline)}</div>
+      ${others.length ? `<div class="others"><div class="row">${others.map(o => logo(o, 116)).join('')}</div>
+        <div class="more">今日还有 <b>${d.count - 1}</b> ${esc(d.unit)}</div></div>` : ''}`;
+  },
+};
+
+window.__init = async function(d){
+  const c = document.getElementById('c');
+  const v = VARIANTS[d.variant] ? d.variant : 'A';
+  c.classList.add(v);
+  c.insertAdjacentHTML('beforeend', VARIANTS[v](d));
+  await document.fonts.ready;
+  for (const t of c.querySelectorAll('[data-fit]')) fit(t, Number(t.dataset.fit), Number(t.dataset.lines || 1), 36);
+  await Promise.all([...c.querySelectorAll('img')].map(img => new Promise(r => {
+    if (img.complete) return r();
+    img.onload = r; img.onerror = () => { img.style.visibility = 'hidden'; r(); };
+  })));
+  return true;
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<!-- Hook cover: 浅色渐变 + 三行粗体大标题（主角词放浅蓝色块）+ 一行看点小字 + 仿网页窗口 + 右下角主持人半身贴纸。
+     竖版 3:4（1080×1440）给抖音/快手/小红书/视频号/公众号；横版 16:9（1920×1080）给 B 站。同一套元素，排版不同。
+     数据由 src/render/logos.mjs 的 hookCoverData() 生成，全部自动填。
+     样式：P2=窗口放头条网页截图、主持人指着（竖版默认）；P1=窗口放 logo 卡片（竖版没截图时自动用它）；P3=窗口放今日清单；
+          L1=左字右窗口卡片（横版默认）；L2=左字右截图；L3=大头主持人在左、字在右。
+     横版注意：B 站手机首页会从 16:9 中间裁成 4:3（x 240～1680），右下角盖时长，所以字和人脸都放在中间区域。 -->
+<style>
+  :root{--ink:#141B34;--blue:#2F6BFF;--muted:#55607E;--line:#E4E9F7;--pill:#D5E3FF;
+    --font:"Noto Sans SC","HarmonyOS Sans SC","MiSans","Microsoft YaHei UI","Microsoft YaHei",sans-serif;
+    --serif:Georgia,"Noto Serif SC","Noto Sans SC",serif;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{overflow:hidden;font-family:var(--font);color:var(--ink);background:#F3F5FF}
+  #c{position:absolute;inset:0;overflow:hidden;
+     background:radial-gradient(60% 45% at 100% 0%, #D9E5FF 0%, rgba(217,229,255,0) 100%),
+                radial-gradient(55% 40% at 0% 100%, #FCE6F1 0%, rgba(252,230,241,0) 100%),
+                radial-gradient(50% 40% at 100% 100%, #E9E3FF 0%, rgba(233,227,255,0) 100%),
+                linear-gradient(165deg,#F2F5FF 0%,#FAFBFF 50%,#F6F2FF 100%)}
+  .tag{position:absolute;display:inline-flex;align-items:center;gap:.45em;background:#fff;border:2px solid var(--line);color:var(--ink);
+       font-weight:800;padding:.32em .8em;border-radius:999px;box-shadow:0 8px 22px rgba(40,60,140,.08);white-space:nowrap;letter-spacing:.04em}
+  .tag i{width:.5em;height:.5em;border-radius:50%;background:var(--blue)}
+  .tag b{color:var(--blue)}
+  .title{position:absolute;font-weight:900;line-height:1.16;letter-spacing:.01em}
+  .title .ln{display:block;width:max-content;white-space:nowrap}
+  .title .pill{display:inline-block;background:var(--pill);border-radius:.28em;padding:.02em .28em .08em;font-family:var(--serif);font-weight:900;margin:.06em 0}
+  .sub{position:absolute;font-weight:700;color:var(--muted);white-space:nowrap;letter-spacing:.06em}
+  /* 仿网页窗口 */
+  .win{position:absolute;background:#fff;border-radius:34px;border:2px solid #E8ECF8;box-shadow:0 30px 70px rgba(40,60,140,.16);overflow:hidden;display:flex;flex-direction:column}
+  .bar{flex:none;height:64px;display:flex;align-items:center;gap:12px;padding:0 24px;background:#F7F8FC;border-bottom:2px solid #EEF1F8}
+  .bar .d{flex:none;width:16px;height:16px;border-radius:50%}
+  .bar .nav{flex:none;margin-left:14px;color:#A5ADC2;font-size:30px;font-weight:700;letter-spacing:10px}
+  .bar .url{flex:1;min-width:0;margin-left:8px;height:38px;border-radius:19px;background:#fff;border:2px solid #E8ECF6;color:#7B859E;font-size:21px;
+            display:flex;align-items:center;padding:0 18px;white-space:nowrap;overflow:hidden;font-family:Consolas,var(--font)}
+  .body{flex:1;min-height:0;position:relative}
+  .body.shot img{width:100%;height:100%;object-fit:cover;display:block}
+  .cards{display:flex;flex-direction:column;justify-content:center;gap:26px;padding:30px 34px;height:100%}
+  .card{display:flex;align-items:center;gap:26px;background:#fff;border-radius:28px;border:2px solid #EDF0F8;padding:20px 26px;box-shadow:0 10px 26px rgba(40,60,140,.07)}
+  .card .nm{font-weight:800;line-height:1.15;white-space:nowrap;overflow:hidden}
+  .card .co{color:#8A93AA;font-weight:600;margin-top:6px;white-space:nowrap;overflow:hidden}
+  .logo{flex:none;border-radius:26%;background:#fff;border:2px solid #EDF0F8;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .logo img{width:62%;height:62%;object-fit:contain}
+  .logo.photo img{width:100%;height:100%;object-fit:cover}
+  .logo .mono{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;background:linear-gradient(135deg,#4C86FF,#1C4FD6)}
+  .list{display:flex;flex-direction:column;justify-content:center;gap:18px;padding:26px 30px;height:100%}
+  .list .row{display:flex;align-items:center;gap:20px}
+  .list .row .t{font-weight:800;white-space:nowrap;overflow:hidden;flex:1;min-width:0}
+  .badge{position:absolute;background:#fff;border-radius:30%;box-shadow:0 16px 36px rgba(40,60,140,.22);display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .badge img{width:66%;height:66%;object-fit:contain}
+  .badge.photo img{width:100%;height:100%;object-fit:cover}
+  /* 主持人：贴纸图（白边已做进图里），只露上半身 */
+  .host{position:absolute;overflow:hidden}
+  .host img{position:absolute;left:0;top:0;width:100%}
+  .brand{position:absolute;font-weight:800;color:#8A93AA;letter-spacing:.08em;white-space:nowrap}
+  .safe{position:absolute;border:4px dashed rgba(255,0,80,.55);pointer-events:none}
+</style>
+</head>
+<body>
+<div id="c"></div>
+<script>
+function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function logo(it, size){
+  const st = `width:${size}px;height:${size}px`;
+  if (it?.logo) return `<div class="logo ${it.logoKind === 'photo' ? 'photo' : ''}" style="${st}"><img src="${esc(it.logo)}"></div>`;
+  const ch = String(it?.mono || it?.name || '?').trim().charAt(0).toUpperCase();
+  return `<div class="logo" style="${st}"><div class="mono" style="font-size:${Math.round(size * .5)}px">${esc(ch)}</div></div>`;
+}
+function bar(url){ return `<div class="bar"><span class="d" style="background:#FF6058"></span><span class="d" style="background:#FFBD2E"></span><span class="d" style="background:#28C840"></span><span class="nav">‹ ›</span><div class="url">${esc(url || '')}</div></div>`; }
+// 标题：每行 {pre, pill, t}，pill 是放进色块的主角词
+const title = d => d.lines.map(l => `<span class="ln">${esc(l.pre || '')}${l.pill ? `<span class="pill">${esc(l.pill)}</span>` : ''}${esc(l.t || '')}</span>`).join('');
+function cards(list, logoSize, nm, co, maxw){
+  return `<div class="cards">${list.map(c => `<div class="card">${logo(c, logoSize)}<div style="min-width:0;max-width:${maxw}px"><div class="nm" style="font-size:${nm}px">${esc(c.name)}</div>${c.company ? `<div class="co" style="font-size:${co}px">${esc(c.company)}</div>` : ''}</div></div>`).join('')}</div>`;
+}
+const list = (d, fs) => `<div class="list">${d.list.slice(0, 6).map(r => `<div class="row">${logo(r, Math.round(fs * 1.7))}<div class="t" style="font-size:${fs}px">${esc(r.name)}</div></div>`).join('')}</div>`;
+const shot = d => `<div class="body shot"><img src="${esc(d.shot)}" style="object-position:${d.shotKind === 'screenshot' ? 'top left' : 'center'}"></div>`;
+function host(d, pose, x, y, w, h, flip){
+  const px = v => typeof v === 'number' ? v + 'px' : v;
+  return `<div class="host" style="left:${px(x)};top:${px(y)};width:${w}px;height:${h}px"><img src="${esc(d.hosts[pose] || Object.values(d.hosts)[0])}" style="${flip ? 'transform:scaleX(-1)' : ''}"></div>`;
+}
+const badge = (c, css) => c?.logo ? `<div class="badge ${c.logoKind === 'photo' ? 'photo' : ''}" style="${css}"><img src="${esc(c.logo)}"></div>` : '';
+const tag = d => `<i></i>${esc(d.column)}<b>·</b>${esc(d.date)}`;
+// 竖版共用的上半部分：标签、标题、看点
+const topP = d => `<div class="tag" style="left:64px;top:70px;font-size:34px">${tag(d)}</div>
+  <div class="title" data-fitw="950" data-maxh="500" style="left:64px;top:160px;font-size:122px">${title(d)}</div>
+  ${d.sub ? `<div class="sub" data-fitw="950" style="left:68px;top:var(--subTop);font-size:38px">${esc(d.sub)}</div>` : ''}
+  <div class="brand" style="left:70px;bottom:36px;font-size:28px">${esc(d.channel)}</div>`;
+const topL = (d, x, fitw) => `<div class="tag" style="left:${x}px;top:150px;font-size:34px">${tag(d)}</div>
+  <div class="title" data-fitw="${fitw}" data-maxh="560" style="left:${x}px;top:230px;font-size:122px">${title(d)}</div>
+  ${d.sub ? `<div class="sub" data-fitw="${fitw}" style="left:${x + 4}px;top:var(--subTop);font-size:38px">${esc(d.sub)}</div>` : ''}
+  <div class="brand" style="left:${x + 6}px;bottom:40px;font-size:28px">${esc(d.channel)}</div>`;
+
+const V = {
+  // ===== 竖版 3:4 =====
+  P1: d => `${topP(d)}
+      <div class="win" style="left:64px;top:var(--winTop);width:690px;bottom:96px">${bar(d.url)}<div class="body">${cards(d.cards.slice(0, 3), 132, 50, 30, 420)}</div></div>
+      ${host(d, d.pose, 470, 'var(--hostTop)', 640, 900)}`,
+  P2: d => `${topP(d)}
+      <div class="win" style="left:64px;top:var(--winTop);width:740px;bottom:96px;transform:rotate(-2deg)">${bar(d.url)}${shot(d)}</div>
+      ${host(d, 'point', 470, 'var(--hostTop)', 640, 900)}
+      ${badge(d.cards[0], 'left:24px;top:calc(var(--winTop) - 30px);width:124px;height:124px;transform:rotate(-8deg)')}`,
+  P3: d => `${topP(d).replace(/<div class="sub"[\s\S]*?<\/div>/, '')}
+      <div class="win" style="left:64px;top:var(--winTop0);width:720px;bottom:96px">${bar(`今日 ${d.count} ${d.unit} · ${d.channel}`)}<div class="body">${list(d, 38)}</div></div>
+      ${host(d, 'open', 520, 'var(--hostTop0)', 640, 900)}`,
+  // ===== 横版 16:9（B 站）=====
+  L1: d => `${topL(d, 270, 860)}
+      <div class="win" style="left:1190px;top:56px;width:500px;height:400px;transform:rotate(2deg)">${bar(d.url)}<div class="body">${cards(d.cards.slice(0, 2), 96, 38, 24, 290)}</div></div>
+      ${host(d, d.pose, 1170, 470, 560, 610)}`,
+  L2: d => `${topL(d, 270, 800)}
+      <div class="win" style="left:1080px;top:150px;width:660px;height:520px;transform:rotate(3deg)">${bar(d.url)}${shot(d)}</div>
+      ${badge(d.cards[0], 'left:1010px;top:96px;width:150px;height:150px;transform:rotate(-8deg)')}
+      ${host(d, 'point', 1300, 480, 470, 600)}`,
+  L3: d => `${host(d, d.pose, 150, 230, 640, 850, true)}${topL(d, 800, 860)}
+      <div style="position:absolute;left:800px;top:calc(var(--subTop) + 90px);display:flex;gap:22px">${d.cards.slice(0, 3).map(c => `<div class="card" style="padding:14px 22px 14px 14px">${logo(c, 76)}<div class="nm" style="font-size:32px;max-width:240px">${esc(c.name)}</div></div>`).join('')}</div>`,
+};
+
+// 每行字号缩到不超过宽度；整块标题高过 maxh 再整体缩
+function fitTitle(el, maxw, maxh, min){
+  const base = parseFloat(getComputedStyle(el).fontSize);
+  for (const ln of el.querySelectorAll('.ln')) {
+    let s = base; ln.style.fontSize = s + 'px';
+    while (ln.scrollWidth > maxw && s > min) { s -= 2; ln.style.fontSize = s + 'px'; }
+  }
+  let k = 1;
+  while (el.offsetHeight > maxh && k > .5) {
+    k -= .04;
+    for (const ln of el.querySelectorAll('.ln')) ln.style.fontSize = Math.max(min * .8, parseFloat(ln.style.fontSize) * .96) + 'px';
+  }
+}
+function fitOne(el, max, min){ let s = parseFloat(getComputedStyle(el).fontSize); while (el.scrollWidth > max && s > min) { s -= 1; el.style.fontSize = s + 'px'; } }
+
+window.__init = async function(d){
+  const c = document.getElementById('c');
+  const v = V[d.variant] ? d.variant : (d.landscape ? 'L1' : 'P1');
+  c.classList.add(v);
+  c.insertAdjacentHTML('beforeend', V[v](d));
+  await document.fonts.ready;
+  for (const t of c.querySelectorAll('.title')) fitTitle(t, Number(t.dataset.fitw), Number(t.dataset.maxh), 60);
+  for (const t of c.querySelectorAll('.sub')) fitOne(t, Number(t.dataset.fitw), 24);
+  // 版面跟着标题实际高度往下排
+  const t = c.querySelector('.title');
+  const tb = t.offsetTop + t.offsetHeight;
+  c.style.setProperty('--subTop', (tb + 22) + 'px');
+  c.style.setProperty('--winTop', (tb + 130) + 'px');
+  c.style.setProperty('--winTop0', (tb + 50) + 'px');
+  c.style.setProperty('--hostTop', Math.max(tb + 96, 1440 - 760) + 'px'); // 不压住看点那行
+  c.style.setProperty('--hostTop0', Math.max(tb + 30, 1440 - 800) + 'px');
+  if (d.safe) c.insertAdjacentHTML('beforeend', `<div class="safe" style="left:240px;top:0;width:1440px;height:1080px"></div><div class="safe" style="left:1640px;top:960px;width:280px;height:120px;background:rgba(0,0,0,.35)"></div>`);
+  await Promise.all([...c.querySelectorAll('img')].map(img => new Promise(r => {
+    if (img.complete) return r();
+    img.onload = r; img.onerror = () => { img.style.visibility = 'hidden'; r(); };
+  })));
+  // 检查有没有字溢出（返回给程序写日志）
+  const over = [...c.querySelectorAll('.ln,.sub')].filter(e => { const b = e.getBoundingClientRect(); return b.right > innerWidth - 20 || b.bottom > innerHeight; }).map(e => e.textContent);
+  return {variant: v, overflow: over};
+};
+</script>
+</body>
+</html>

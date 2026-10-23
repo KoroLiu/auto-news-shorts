@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>AI Daily Template</title>
+<script src="icons.js"></script>
+<style>
+  :root{
+    --bg:#F4F8FF; --bg2:#EAF1FE;
+    --ink:#122039; --ink2:#34445F; --muted:#7A89A3; --line:#DDE7F7;
+    --blue:#2F6BFF; --blue-deep:#1C4FD6; --blue-soft:#E7EFFF; --sky:#3C9BFF; --indigo:#6A5CF5; --amber:#F08A1C;
+    --card:#FFFFFF;
+    --font:"HarmonyOS Sans SC","MiSans","Source Han Sans SC","Noto Sans SC","Noto Sans CJK SC","Microsoft YaHei UI","Microsoft YaHei","PingFang SC",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased}
+  #stage{position:absolute;inset:0;overflow:hidden;
+    background:
+      radial-gradient(900px 520px at 8% -6%, #DCE8FF 0%, rgba(220,232,255,0) 70%),
+      radial-gradient(1000px 620px at 104% 108%, #DDEBFF 0%, rgba(221,235,255,0) 70%),
+      linear-gradient(180deg,#F8FBFF 0%,#EEF4FE 100%);}
+  #dots{position:absolute;inset:0;background-image:radial-gradient(rgba(47,107,255,.10) 1.3px, transparent 1.4px);background-size:30px 30px;opacity:.7}
+  /* header */
+  #header{position:absolute;left:0;top:0;width:1920px;height:64px;background:rgba(255,255,255,.88);border-bottom:1px solid var(--line);display:flex;align-items:center;z-index:5}
+  #brand{position:absolute;left:36px;top:0;height:64px;display:flex;align-items:center;gap:12px}
+  #brand .logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#3C7BFF,#1C4FD6);color:#fff;font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;letter-spacing:.5px;box-shadow:0 4px 10px rgba(47,107,255,.25)}
+  #brand .name{font-size:22px;font-weight:700;color:var(--ink);letter-spacing:.5px}
+  #dateTag{position:absolute;right:36px;top:0;height:64px;display:flex;align-items:center;font-size:20px;color:var(--muted);font-weight:500;letter-spacing:.5px}
+  #tabs{position:absolute;left:50%;top:12px;height:40px;transform:translateX(-50%);display:flex}
+  #tabPill{position:absolute;top:0;height:40px;border-radius:20px;background:var(--blue);box-shadow:0 4px 12px rgba(47,107,255,.28)}
+  .tab{position:relative;height:40px;padding:0 22px;display:flex;align-items:center;justify-content:center;font-size:19px;color:#5E6E8A;font-weight:600;white-space:nowrap;z-index:1}
+  .tab.on{color:#fff}
+  /* scene */
+  #scene{position:absolute;left:0;top:64px;width:1920px;height:970px}
+  .title{position:absolute;left:120px;right:120px;top:52px;text-align:center;font-weight:800;color:var(--blue-deep);letter-spacing:1px;white-space:nowrap;line-height:1.15}
+  .srcline{position:absolute;left:0;right:0;top:136px;text-align:center;font-size:21px;color:var(--muted);letter-spacing:.5px}
+  .srcline b{color:var(--blue);font-weight:600}
+  .grid{position:absolute;left:130px;width:1660px;top:196px;height:640px;display:flex;flex-direction:column;justify-content:center;gap:28px}
+  .row{display:flex;justify-content:center;gap:28px;align-items:stretch}
+  .card{background:var(--card);border:1.5px solid #E2EAF8;border-radius:22px;padding:28px 32px 30px;box-shadow:0 10px 28px rgba(30,70,160,.07);position:relative;overflow:hidden}
+  .card .hd{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .card .ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex:none}
+  .card .ic svg{width:27px;height:27px}
+  .card .h{font-size:30px;font-weight:800;letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card .b{font-size:27px;line-height:1.55;color:var(--ink2);letter-spacing:.3px;word-break:normal;overflow-wrap:anywhere;line-break:auto}
+  .card .bar{position:absolute;left:0;top:0;bottom:0;width:6px;border-radius:0}
+  /* media overlay */
+  #veil{position:absolute;left:0;top:64px;width:1920px;height:970px;background:rgba(236,243,255,.62);opacity:0;z-index:6}
+  .media{position:absolute;z-index:7;opacity:0;background:#fff;border-radius:20px;padding:14px;box-shadow:0 30px 80px rgba(20,50,120,.28),0 4px 14px rgba(20,50,120,.12)}
+  .media .imgbox{overflow:hidden;border-radius:10px;background:#F2F5FA;position:relative}
+  .media img{display:block;width:100%;height:100%;object-fit:contain}
+  .media .cap{position:absolute;left:50%;bottom:-46px;transform:translateX(-50%);font-size:19px;color:var(--muted);white-space:nowrap;background:rgba(255,255,255,.92);padding:5px 16px;border-radius:14px;border:1px solid var(--line)}
+  /* translated tweet card */
+  .media.tweet{width:1080px;padding:36px 44px 30px;border-radius:24px}
+  .tw-head{display:flex;align-items:center;gap:18px;margin-bottom:22px}
+  .tw-head .av{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#3C7BFF,#1C4FD6);color:#fff;font-size:30px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+  .tw-head .who{flex:1;min-width:0}
+  .tw-head .nm{font-size:28px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:8px;white-space:nowrap}
+  .tw-head .vf svg{width:26px;height:26px;display:block}
+  .tw-head .hd{font-size:22px;color:var(--muted);margin-top:2px}
+  .tw-head .xl{font-size:40px;font-weight:900;color:#111;font-family:Arial,sans-serif}
+  .tw-zh{font-size:38px;line-height:1.55;color:var(--ink);font-weight:500;letter-spacing:.5px}
+  .tw-en{margin-top:18px;padding-top:16px;border-top:1px solid #E6EDF8;font-size:21px;line-height:1.5;color:#7A89A3;font-family:"Segoe UI",Arial,var(--font);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+  .tw-foot{margin-top:18px;font-size:19px;color:#98A5BC}
+  /* subtitle */
+  #sub{position:absolute;left:50%;bottom:78px;transform:translateX(-50%);z-index:9;background:rgba(18,32,60,.82);color:#fff;font-size:37px;font-weight:500;letter-spacing:1.5px;padding:10px 28px 12px;border-radius:14px;white-space:nowrap;line-height:1.3;opacity:0;box-shadow:0 6px 18px rgba(18,32,60,.18)}
+  /* chapter strip */
+  #strip{position:absolute;left:0;bottom:0;width:1920px;height:46px;background:rgba(255,255,255,.92);border-top:1px solid var(--line);display:flex;z-index:8}
+  .seg{position:relative;height:46px;border-right:1px solid #E8EEF9;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .seg .fill{position:absolute;left:0;top:0;bottom:0;background:#EEF3FF;width:0}
+  .seg .prog{position:absolute;left:0;bottom:0;height:4px;background:var(--blue);width:0}
+  .seg .lb{position:relative;font-size:15px;color:#8C99B1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;padding:0 6px;font-weight:500}
+  .seg.cur .lb{color:var(--blue-deep);font-weight:700}
+  .seg.cur .fill{background:#E2ECFF}
+  /* overview */
+  .ovTitle{position:absolute;left:0;right:0;top:40px;text-align:center;font-size:60px;font-weight:800;color:var(--blue-deep);letter-spacing:2px}
+  .ovSub{position:absolute;left:0;right:0;top:122px;text-align:center;font-size:24px;color:var(--muted);letter-spacing:1px}
+  .ovWin{position:absolute;left:150px;width:1620px;top:180px;height:730px;overflow:hidden}
+  .ovWrap{position:absolute;left:0;top:0;width:1620px;display:flex;gap:30px;align-items:flex-start}
+  .ovCol{flex:1;display:flex;flex-direction:column;gap:24px}
+  .ovCard{background:#fff;border:1.5px solid #E2EAF8;border-radius:20px;padding:22px 28px 22px;box-shadow:0 8px 24px rgba(30,70,160,.06)}
+  .ovCard .hd{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+  .ovCard .hd .ic{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center}
+  .ovCard .hd .ic svg{width:22px;height:22px}
+  .ovCard .hd .h{font-size:27px;font-weight:800}
+  .ovCard li{list-style:none;font-size:24px;line-height:1.5;color:var(--ink2);padding-left:22px;position:relative;margin:3px 0}
+  .ovCard li:before{content:"";position:absolute;left:4px;top:15px;width:8px;height:8px;border-radius:50%;background:#9DB8F5}
+  /* outro */
+  .outro{position:absolute;left:0;right:0;top:300px;text-align:center}
+  .outro .big{font-size:76px;font-weight:800;color:var(--blue-deep);letter-spacing:3px}
+  .outro .small{margin-top:26px;font-size:34px;color:var(--ink2);letter-spacing:2px}
+  .outro .chip{display:inline-flex;align-items:center;gap:12px;margin-top:46px;padding:12px 28px;border-radius:30px;background:#fff;border:1.5px solid var(--line);font-size:24px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="dots"></div>
+  <div id="header">
+    <div id="brand"><div class="logo">AI</div><div class="name" id="brandName"></div></div>
+    <div id="tabs"><div id="tabPill"></div></div>
+    <div id="dateTag"></div>
+  </div>
+  <div id="scene"></div>
+  <div id="veil"></div>
+  <div id="mediaLayer"></div>
+  <div id="sub"></div>
+  <div id="strip"></div>
+</div>
+<script>
+'use strict';
+const COLORS = ['#2F6BFF','#1A8CFF','#6A5CF5','#F08A1C','#2F6BFF','#6A5CF5'];
+const CHAPTER_ICON = {'要闻':'star','模型发布':'rocket','产品应用':'app-window','开发生态':'code','技术与洞察':'lightbulb','行业动态':'globe','前瞻与传闻':'eye','概览':'list-checks'};
+let D = null, SEGS = [], cur = -1, tabEls = {}, segEls = [], media = [], sceneRefs = null;
+const $ = (s, r=document) => r.querySelector(s);
+const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
+const easeOut = x => 1 - Math.pow(1 - clamp(x,0,1), 3);
+const easeInOut = x => { x = clamp(x,0,1); return x < .5 ? 4*x*x*x : 1 - Math.pow(-2*x+2, 3)/2; };
+const r3 = v => Math.round(v*1000)/1000, r1 = v => Math.round(v*10)/10;
+let SIG = [];
+function css(el, prop, val){ if(el.__s === undefined) el.__s = {}; if(el.__s[prop] !== val){ el.style[prop] = val; el.__s[prop] = val; } SIG.push(val); }
+function icon(name, color){ const inner = (window.ICONS && (ICONS[name] || ICONS['sparkles'])) || ''; return `<svg viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`; }
+function hexA(hex, a){ const n = parseInt(hex.slice(1),16); return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`; }
+function esc(s){ return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function fitOneLine(el, maxPx, minPx, maxWidth){
+  let size = maxPx; el.style.fontSize = size + 'px';
+  while (el.scrollWidth > maxWidth && size > minPx){ size -= 2; el.style.fontSize = size + 'px'; }
+  return size;
+}
+
+window.__init = async function(data){
+  D = data; SEGS = data.segments;
+  $('#brandName').textContent = data.channel.name;
+  $('#dateTag').textContent = data.dateLabel;
+  // tabs = chapters present in this episode
+  const tabs = $('#tabs');
+  for (const ch of data.chapters){ const t = document.createElement('div'); t.className = 'tab'; t.textContent = ch; tabs.appendChild(t); tabEls[ch] = t; }
+  if (data.chapters.length <= 1) tabs.style.display = 'none'; // 板块只有一个栏目（如每日AI要闻）：不显示分类导航
+  // chapter strip
+  const strip = $('#strip'); const total = data.duration;
+  SEGS.forEach((s, i) => {
+    const e = document.createElement('div'); e.className = 'seg';
+    e.style.width = ((s.end - s.start) / total * 1920).toFixed(3) + 'px';
+    e.innerHTML = `<div class="fill"></div><div class="prog"></div><div class="lb">${esc(s.short || '')}</div>`;
+    if ((s.end - s.start) / total * 1920 < 34) e.querySelector('.lb').style.display = 'none';
+    strip.appendChild(e); segEls.push(e);
+  });
+  // preload images
+  const srcs = [...new Set(SEGS.flatMap(s => (s.media || []).filter(m => m.src).map(m => m.src)))];
+  window.__imgSize = {};
+  await Promise.all(srcs.map(src => new Promise(res => { const im = new Image(); im.onload = async () => { try { await im.decode(); } catch(e){} window.__imgSize[src] = [im.naturalWidth, im.naturalHeight]; res(); }; im.onerror = () => { window.__imgSize[src] = null; res(); }; im.src = src; })));
+  await document.fonts.ready;
+  return {ok:true, images: Object.keys(window.__imgSize).length, broken: Object.values(window.__imgSize).filter(v => !v).length};
+};
+
+function layoutRows(n){
+  return ({1:[1],2:[2],3:[3],4:[2,2],5:[3,2],6:[3,3]})[n] || [3,3];
+}
+
+function buildItem(seg){
+  const sc = $('#scene'); sc.innerHTML = '';
+  const title = document.createElement('div'); title.className = 'title'; title.textContent = seg.title; sc.appendChild(title);
+  fitOneLine(title, 64, 40, 1680);
+  const src = document.createElement('div'); src.className = 'srcline';
+  src.innerHTML = seg.sourceLine ? esc(seg.sourceLine).replace(/^(来源[^·]*)/, '<b>$1</b>') : '';
+  sc.appendChild(src);
+  const grid = document.createElement('div'); grid.className = 'grid'; sc.appendChild(grid);
+  const cards = seg.cards || []; const rows = layoutRows(cards.length); let k = 0; const cardEls = [];
+  const colW = {1:1180, 2:800, 3:535};
+  for (const cnt of rows){
+    const row = document.createElement('div'); row.className = 'row'; grid.appendChild(row);
+    for (let j = 0; j < cnt && k < cards.length; j++, k++){
+      const c = cards[k]; const col = COLORS[k % COLORS.length];
+      const el = document.createElement('div'); el.className = 'card';
+      el.style.width = (colW[Math.max(...rows)] || 535) + 'px';
+      el.innerHTML = `<div class="bar" style="background:${hexA(col,.0)}"></div><div class="hd"><div class="ic" style="background:${hexA(col,.11)}">${icon(c.icon, col)}</div><div class="h" style="color:${col}">${esc(c.heading)}</div></div><div class="b">${esc(c.body)}</div>`;
+      row.appendChild(el); cardEls.push(el); el.__col = col;
+    }
+  }
+  // shrink body text if grid overflows
+  let size = cards.length <= 2 ? 30 : 27;
+  const setB = s => cardEls.forEach(e => e.querySelector('.b').style.fontSize = s + 'px');
+  setB(size);
+  while (grid.scrollHeight > 650 && size > 20){ size -= 1; setB(size); }
+  // headings fit
+  cardEls.forEach(e => { const h = e.querySelector('.h'); const w = e.clientWidth - 64 - 60; fitOneLine(h, 30, 22, w); });
+  // media overlays
+  const ml = $('#mediaLayer'); ml.innerHTML = ''; media = [];
+  for (const m of (seg.media || [])){
+    if (m.type === 'tweet'){
+      const el = document.createElement('div'); el.className = 'media tweet';
+      const ini = esc((m.name || m.handle || 'X').replace(/^[^\p{L}\p{N}]+/u, '').slice(0, 1).toUpperCase());
+      el.innerHTML = `<div class="tw-head"><div class="av">${ini}</div><div class="who"><div class="nm">${esc(m.name)}<span class="vf">${icon('circle-check', '#2F6BFF')}</span></div><div class="hd">@${esc(m.handle)}</div></div><div class="xl">X</div></div><div class="tw-zh">${esc(m.textZh)}</div>${m.text ? `<div class="tw-en">${esc(m.text)}</div>` : ''}<div class="tw-foot">${esc(m.date || '')}${m.date ? ' · ' : ''}中文为 AI 翻译</div>`;
+      ml.appendChild(el);
+      // fit Chinese text
+      const zh = el.querySelector('.tw-zh'); let fs = 38; zh.style.fontSize = fs + 'px';
+      while (el.offsetHeight > 700 && fs > 26){ fs -= 2; zh.style.fontSize = fs + 'px'; }
+      const en = el.querySelector('.tw-en'); if (en && el.offsetHeight > 720) en.remove();
+      el.style.left = Math.round(960 - el.offsetWidth/2) + 'px'; el.style.top = Math.round(64 + 455 - el.offsetHeight/2) + 'px';
+      media.push({el, img: null, m}); continue;
+    }
+    const sz = window.__imgSize[m.src]; if (!sz) continue;
+    const maxW = 1260, maxH = 640; const sc2 = Math.min(maxW / sz[0], maxH / sz[1], 2.2);
+    const w = Math.round(sz[0]*sc2), h = Math.round(sz[1]*sc2);
+    const el = document.createElement('div'); el.className = 'media';
+    el.style.width = (w + 28) + 'px'; el.style.height = (h + 28) + 'px';
+    el.style.left = Math.round(960 - (w+28)/2) + 'px'; el.style.top = Math.round(64 + 455 - (h+28)/2) + 'px';
+    el.innerHTML = `<div class="imgbox" style="width:${w}px;height:${h}px"><img src="${esc(m.src)}"></div>` + (m.caption ? `<div class="cap">${esc(m.caption)}</div>` : '');
+    ml.appendChild(el); media.push({el, img: el.querySelector('img'), m});
+  }
+  return {title, src, cards: cardEls, grid};
+}
+
+function buildIntro(seg){
+  const sc = $('#scene'); sc.innerHTML = ''; $('#mediaLayer').innerHTML = ''; media = [];
+  sc.innerHTML = `<div class="ovTitle">${esc(seg.title)}</div><div class="ovSub">${esc(seg.subtitle || '')}</div><div class="ovWin"><div class="ovWrap"><div class="ovCol"></div><div class="ovCol"></div></div></div>`;
+  const cols = sc.querySelectorAll('.ovCol'); const blocks = [];
+  (seg.overview || []).forEach((g, i) => {
+    const col = COLORS[i % COLORS.length];
+    const el = document.createElement('div'); el.className = 'ovCard';
+    el.innerHTML = `<div class="hd"><div class="ic" style="background:${hexA(col,.11)}">${icon(CHAPTER_ICON[g.chapter] || 'sparkles', col)}</div><div class="h" style="color:${col}">${esc(g.chapter)}</div></div><ul>${g.items.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`;
+    // greedy: append to shorter column
+    const target = cols[0].offsetHeight <= cols[1].offsetHeight ? cols[0] : cols[1];
+    target.appendChild(el); blocks.push(el);
+  });
+  const wrap = sc.querySelector('.ovWrap');
+  const overflow = Math.max(0, wrap.scrollHeight - 730 + 20);
+  return {title: sc.querySelector('.ovTitle'), sub: sc.querySelector('.ovSub'), wrap, blocks, overflow};
+}
+
+function buildOutro(seg){
+  const sc = $('#scene'); sc.innerHTML = ''; $('#mediaLayer').innerHTML = ''; media = [];
+  sc.innerHTML = `<div class="outro"><div class="big">${esc(seg.title || '今天的资讯就到这里')}</div><div class="small">${esc(seg.subtitle || '感谢收看，我们明天见')}</div><div><div class="chip">${icon('bell','#2F6BFF').replace('<svg','<svg width="24" height="24"')}<span>${esc(seg.chip || '')}</span></div></div></div>`;
+  return {box: sc.querySelector('.outro')};
+}
+
+function segIndexAt(t){
+  let lo = 0, hi = SEGS.length - 1;
+  while (lo < hi){ const mid = (lo + hi + 1) >> 1; if (SEGS[mid].start <= t) lo = mid; else hi = mid - 1; }
+  return lo;
+}
+
+function tabRect(ch){ const e = tabEls[ch]; return e ? [e.offsetLeft, e.offsetWidth] : null; }
+
+window.renderAt = function(t){
+  SIG = [];
+  const i = segIndexAt(t); const seg = SEGS[i];
+  if (i !== cur){
+    segEls.forEach((e, j) => e.classList.toggle('cur', j === i));
+    sceneRefs = seg.type === 'intro' ? buildIntro(seg) : seg.type === 'outro' ? buildOutro(seg) : buildItem(seg);
+    for (const ch in tabEls) tabEls[ch].classList.toggle('on', ch === seg.chapter);
+    cur = i;
+  }
+  SIG.push(i);
+  const ts = t - seg.start, dur = seg.end - seg.start, tl = seg.end - t;
+  // scene in/out
+  const fadeIn = easeOut(ts / .35), fadeOut = i === SEGS.length - 1 ? 1 : clamp(tl / .22, 0, 1);
+  const sc = $('#scene');
+  css(sc, 'opacity', String(r3(Math.min(1, fadeOut))));
+  if (seg.type === 'item'){
+    const R = sceneRefs;
+    const a = easeOut(ts / .4);
+    css(R.title, 'opacity', String(r3(a))); css(R.title, 'transform', `translateY(${r1((1-a)*18)}px)`);
+    const b = easeOut((ts - .12) / .4); css(R.src, 'opacity', String(r3(b)));
+    const focus = (seg.focus || []).find(f => t >= f.t0 && t < f.t1);
+    R.cards.forEach((el, k) => {
+      const c = easeOut((ts - .18 - k*.07) / .42);
+      let lift = 0, glow = 0;
+      for (const f of (seg.focus || [])){ if (f.card !== k) continue; const g = Math.min(easeOut((t - f.t0)/.25), easeOut((f.t1 - t)/.25)); if (g > glow) glow = g; }
+      glow = clamp(glow, 0, 1); lift = glow * 6;
+      css(el, 'opacity', String(r3(c)));
+      css(el, 'transform', `translateY(${r1((1-c)*30 - lift)}px)`);
+      css(el, 'borderColor', glow > 0.01 ? hexA(el.__col, r3(.2 + .6*glow)) : '#E2EAF8');
+      css(el, 'boxShadow', glow > 0.01 ? `0 ${r1(10+8*glow)}px ${r1(28+14*glow)}px ${hexA(el.__col, r3(.07 + .13*glow))}` : '0 10px 28px rgba(30,70,160,.07)');
+      css(el.querySelector('.bar'), 'background', hexA(el.__col, r3(glow)));
+    });
+    // media overlays
+    let veil = 0;
+    for (const M of media){
+      const m = M.m; let o = 0, s = .94;
+      if (t >= m.t0 - .01 && t < m.t1 + .35){
+        const inA = easeOut((t - m.t0)/.35), outA = clamp((m.t1 - t)/.3 + 0, 0, 1);
+        o = Math.min(inA, t < m.t1 ? 1 : easeOut(outA));
+        if (t >= m.t1) o = easeOut(clamp(1 - (t - m.t1)/.3, 0, 1));
+        s = .94 + .06*inA;
+      }
+      veil = Math.max(veil, o);
+      css(M.el, 'opacity', String(r3(o)));
+      css(M.el, 'transform', `scale(${r3(s)})`);
+      if (o > 0 && M.img){ const kb = 1 + .035*clamp((t - m.t0)/Math.max(1, m.t1 - m.t0), 0, 1); css(M.img, 'transform', `scale(${r3(kb)})`); }
+    }
+    css($('#veil'), 'opacity', String(r3(veil)));
+    css($('#scene'), 'filter', veil > .01 ? `blur(${r1(5*veil)}px)` : 'none');
+  } else if (seg.type === 'intro'){
+    const R = sceneRefs; const a = easeOut(ts/.45);
+    css(R.title, 'opacity', String(r3(a))); css(R.title, 'transform', `translateY(${r1((1-a)*18)}px)`);
+    css(R.sub, 'opacity', String(r3(easeOut((ts-.15)/.4))));
+    R.blocks.forEach((el, k) => { const c = easeOut((ts - .25 - k*.08)/.45); css(el, 'opacity', String(r3(c))); css(el, 'transform', `translateY(${r1((1-c)*26)}px)`); });
+    const p = easeInOut((ts - dur*.38) / (dur*.45));
+    css(R.wrap, 'transform', `translateY(${-Math.round(R.overflow * p)}px)`);
+    css($('#veil'), 'opacity', '0'); css($('#scene'), 'filter', 'none');
+  } else {
+    const R = sceneRefs; const a = easeOut(ts/.5);
+    css(R.box, 'opacity', String(r3(a))); css(R.box, 'transform', `translateY(${r1((1-a)*20)}px)`);
+    css($('#veil'), 'opacity', '0'); css($('#scene'), 'filter', 'none');
+  }
+  // tab pill slide
+  const pill = $('#tabPill');
+  const now = tabRect(seg.chapter);
+  if (now){
+    let prev = null; for (let j = i - 1; j >= 0; j--){ if (SEGS[j].chapter){ prev = tabRect(SEGS[j].chapter); break; } }
+    const k = prev ? easeInOut(ts / .45) : 1; const src = prev || now;
+    const x = Math.round(src[0] + (now[0] - src[0]) * k), w = Math.round(src[1] + (now[1] - src[1]) * k);
+    css(pill, 'opacity', '1'); css(pill, 'left', x + 'px'); css(pill, 'width', w + 'px');
+    for (const ch in tabEls){ const on = ch === seg.chapter && k > .55; if (tabEls[ch].classList.contains('on') !== on) tabEls[ch].classList.toggle('on', on); SIG.push(on ? 1 : 0); }
+  } else { css(pill, 'opacity', '0'); for (const ch in tabEls) if (tabEls[ch].classList.contains('on')) tabEls[ch].classList.remove('on'); }
+  // strip progress
+  segEls.forEach((e, j) => {
+    const w = parseFloat(e.style.width);
+    const p = j < i ? 1 : j > i ? 0 : clamp(ts / dur, 0, 1);
+    css(e.querySelector('.prog'), 'width', (Math.round(w * p / 3) * 3) + 'px');
+    css(e.querySelector('.fill'), 'width', j < i ? '100%' : '0px');
+  });
+  // subtitles
+  const subEl = $('#sub');
+  const cues = seg.cues || []; let cue = null;
+  for (const c of cues){ if (t >= c.t0 && t < c.t1){ cue = c; break; } }
+  if (cue){
+    if (subEl.textContent !== cue.text) subEl.textContent = cue.text;
+    const o = clamp((t - cue.t0) / .08, 0, 1);
+    css(subEl, 'opacity', String(r3(o)));
+    SIG.push(cue.text);
+  } else css(subEl, 'opacity', '0');
+  return SIG.join('|');
+};
+</script>
+</body>
+</html>

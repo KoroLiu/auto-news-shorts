@@ -1,0 +1,216 @@
+{
+  "_doc": "Main settings. Put secrets and machine-specific values (API keys, local paths) in config.local.json, which overrides keys here and is never committed. Full reference: docs/configuration.md",
+  "channel": {
+    "_doc": "name: shown in the video intro and file names. titleSign: the 【sign】 prefix of every title. outroLine/outroChip: closing line and badge.",
+    "name": "My AI News",
+    "titleSign": "MyChannel",
+    "outroLine": "觉得有用的话，欢迎点赞关注，我们明天见！",
+    "outroChip": "每天更新 · 欢迎关注"
+  },
+  "host": {
+    "_doc": "On-screen host images. dir: folder with the pose PNGs listed in docs/custom-host.md (relative to the repo root). Default is a neutral placeholder.",
+    "name": "Host",
+    "dir": "assets/host/placeholder"
+  },
+  "cover": {
+    "_doc": "Covers: cover.jpg (16:9) and cover-portrait.jpg (3:4). style=hook uses src/render/cover-hook.html; hookPortrait P1 logo card / P2 headline screenshot / P3 list; hookLandscape L1 text+card / L2 text+screenshot / L3 large host. style=classic uses the older templates with portraitVariant A/B/C.",
+    "style": "hook",
+    "hookPortrait": "P2",
+    "hookLandscape": "L1",
+    "portraitVariant": "A"
+  },
+  "columns": {
+    "_doc": "Columns (shows). Each makes its own episodes in runs/<date>-<runSuffix>. sources: ids from sources.json; stories: items per episode; rules/writeRules/titleRule: instructions for the AI editor (Chinese, since the videos are Chinese); mode=github groups candidates by repository and skips repos featured in the last dedupeWeeks weeks. See docs/configuration.md.",
+    "news": {
+      "name": "每日AI晚报",
+      "runSuffix": "news",
+      "titleTag": "每日AI晚报",
+      "greeting": "晚上好",
+      "sinceLastEpisode": true,
+      "outroChip": "每天晚上更新 · 欢迎关注",
+      "schedule": "daily",
+      "chapters": [
+        "要闻"
+      ],
+      "stories": {
+        "min": 4,
+        "max": 6,
+        "hardMax": 8
+      },
+      "nonAI": {
+        "max": 2,
+        "candidates": 15,
+        "writeRule": "【这条不是 AI 新闻】它是本期的非 AI 科技大事。讲清楚出了什么事、普通人受什么影响、该做什么；用一句话点出下面「和 AI 的关系」（只能用提醒或提问的口气，不能编造材料里没有的事实、数字或影响）；没有给出和 AI 的关系，就不提 AI。"
+      },
+      "sources": [
+        "x",
+        "openai",
+        "anthropic",
+        "google-ai",
+        "deepmind",
+        "nvidia",
+        "hf-orgs",
+        "techmeme",
+        "verge-ai",
+        "techcrunch-ai",
+        "arstechnica-ai",
+        "arstechnica-all",
+        "theregister",
+        "mittr-ai",
+        "qbitai",
+        "ithome",
+        "36kr",
+        "hn",
+        "reddit",
+        "smolai"
+      ],
+      "excludeAccounts": [],
+      "rules": "【只选】当天已经正式发布、已经发生的 AI 大事（唯一例外见下面的【非 AI 科技大事】）：头部公司（OpenAI、Google、Anthropic、Meta、xAI、微软、英伟达、苹果，以及 DeepSeek、阿里通义千问、字节豆包/Seed、腾讯混元、智谱、Kimi、MiniMax 等）的新模型、重要产品发布、价格/额度大调整、大额融资并购、头部公司 CEO 或创始人级别的人事变动、安全事故；头部公司新一代模型的官方预热（官方帖子或视频放出新模型名，或 API 后台、开源代码里已出现新模型，再加媒体或社区跟进；写稿时讲清楚还没正式发布）；被多家媒体/社区同时报道、大家都在聊的大事。\n【重要性尺子】importance 按「我们的观众（关注 AI 的普通用户和开发者）在不在意、用不用得上」打分，热度只用来确认大家确实在聊，不能把小事抬成大事：\n· 9–10：头部公司新一代旗舰模型发布或官方预热；影响所有人的特大事件（例：全球性网络安全事故、头部 AI 公司上市）；\n· 7–8：普通用户或开发者能直接用上、或明显受影响的（例：主流 AI 产品的大更新、新模型开源、价格/额度大调整、开发者常用平台的重要新接口；AI 在科研、医疗等领域真正做成以前做不到的事；人人都知道的新显卡、新手机）；\n· 融资、估值、裁员、人事、政策、财报：离观众远，默认最多 6；只有头部 AI 公司的大事、而且观众会好奇「为什么」、材料里讲得清原因的（例：OpenAI 估值目标下调及原因），才给 7；\n· 5–6：只有 AI 圈内专业人士才关心（例：训练框架、芯片后端、数据中心设备、开发者工具的小功能），一般不选；\n· 产品小功能、普通人事调动（不是头部公司 CEO 或创始人级别）一律不选；只有一条推特、没有媒体跟进的消息，importance 最多 6。\n入选的条目 importance 要在 7 以上；凑不够下限时，才从 6 分里挑最好的补。\n【国内和国外一视同仁】本节目追踪全世界的 AI 热点：国内、国外的新闻按客观重要性和热度一起比，不设国内比例，也不给国内加分、不硬凑。\n【Hugging Face 官方模型主页】只有大版本发布（新一代模型、旗舰模型）才选，小尺寸版本、量化版本、小更新一律不选。\n【来源】36氪、IT之家、量子位这类转载媒体只是线索，不是来源。每条入选新闻都必须有官方来源（官网、官方博客、官方推文、官方公告）或一手报道的权威媒体（华尔街日报、路透社、彭博、The Verge、TechCrunch 等）；只有转载媒体报道、候选里找不到官方或一手来源的，不选（除非是当天最大的几条新闻之一）。\n【非 AI 科技大事】候选里标〔非AI科技〕的是和 AI 无关、但和科技沾边的新闻。每期最多选 2 条，而且只在它真的是「全网级大事」时才选，凑不够标准就一条都不选；两件事有关联的合成一条，重点讲源头：\n① 至少两家权威媒体在报道，社区也在热议，普通人的生活或工作会直接受影响；\n② 必须和科技沾边：网络安全、芯片、手机和电脑、互联网大公司的大动作、航天、科技政策等都算；纯社会新闻、娱乐、体育不算；\n③ 来源要求更严：必须有官方公告或一手权威报道，传闻一律不选，【来源】里「当天最大的几条新闻之一」的例外对它不适用；\n④ 选了就把 nonAI 填 true，aiAngle 用一句话写出它和 AI 的关系（例：证书私钥泄露 → 你和大模型的通信、API 密钥可能被窃听；漏洞是用 AI 找到的）；这句关系要实在、普通人一听就懂，不要牵强附会、不要编材料里没有的后果；实在扯不上或很牵强，就把 aiAngle 留空字符串。能讲出和 AI 关系的，按重要性正常排序；aiAngle 为空的放在 stories 数组最后。其他条目 nonAI 填 false、aiAngle 留空。没标〔非AI科技〕、但内容其实和 AI 无关的条目，同样按这一段处理。\n【不选】和 AI、科技都无关的新闻；够不上全网级大事的非 AI 新闻；没有官方信号的传闻和爆料（头部公司新模型的官方预热不算传闻，见【只选】）；GitHub 开源项目、小工具、插件（另有每周 GitHub 板块）；编程工具的版本更新；教程、营销软文、招聘、个人观点；小公司财报、地方性新闻；论文；明显超过 48 小时的旧闻；和已选条目重复的同一事件；最近几期已经播过的内容。\n【宁缺毋滥】宁可少选几条，也不要为了凑数选不重要的；但不能少于下限。",
+      "introTitle": "今日 AI 晚报"
+    },
+    "github": {
+      "coverVariant": "B",
+      "name": "每周GitHub项目",
+      "runSuffix": "github",
+      "mode": "github",
+      "titleTag": "本周GitHub热门AI项目",
+      "schedule": "weekly-sunday",
+      "chapters": [
+        "GitHub项目"
+      ],
+      "stories": {
+        "min": 3,
+        "max": 6
+      },
+      "sources": [
+        "gh-trending-weekly",
+        "gh-trending",
+        "gh-daily-archive",
+        "hn",
+        "reddit",
+        "smolai",
+        "simonw"
+      ],
+      "sourceOptions": {
+        "hn": {
+          "hours": 180
+        },
+        "reddit": {
+          "time": "week"
+        }
+      },
+      "windowHours": 180,
+      "dedupeWeeks": 8,
+      "excludeAccounts": [],
+      "rules": "【只选】这一周值得关注的 AI 开源项目（GitHub 仓库）：AI 应用和工具（智能体/Agent、编程助手、AI 工作流、本地部署和推理、语音/图像/视频生成工具、RAG/知识库、MCP 服务器和插件）、AI 框架和基础设施、大公司或知名团队新开源的项目。要能讲清楚「它是做什么的、有什么亮点、适合谁用」。\n【热度】首先看本周涨星（GitHub 本周+N星）；其次看这周上每日热榜几天、单日涨星；在 HN、Reddit 上有讨论，或被 AINews、Simon Willison 提到的，说明是真火，优先。总 Star 很多但这周没怎么涨的老项目不选。Star 数以 GitHub 上显示的为准：涨得再快、数字再大，也不要自己猜是刷星而排除，涨星最多的通常就是本周最火的项目。\n【不选】新闻和公司动态（这个板块只讲项目本身）；awesome 列表、教程合集、提示词合集、课程、电子书、面试题、纯资料或链接列表、论文清单；和 AI 无关的项目；只放模型权重或论文代码、普通人用不上的仓库；看不出用途、没有像样说明文档的仓库；纯营销推广的项目；同一个项目的多个仓库只选一个。\n【中文观众】国内团队的优质项目可以适当照顾，但不硬凑。\n【宁缺毋滥】质量一般的周就选 3 个，不要为了凑数选不值得讲的。",
+      "titleRule": "写成「项目名：一句话说清它是做什么的」（例如「Hermes Agent：会自我进化的 AI 助手」），20 字以内",
+      "writeRules": "【GitHub 项目】这一期是开源项目介绍，不是新闻：\n- 每个项目讲清楚四件事：它是做什么的、亮点（和同类比有什么不同）、适合谁用、怎么用（安装或上手方式一句话，比如「用 pip 一行命令就能装」，不要念命令原文）。\n- 第一句说出项目名和一句话定位。Star 总数、本周涨星等数字只用材料【GitHub 项目信息】里给的；口播时说成「4.2 万 Star」「这周涨了 5000 多 Star」这样。\n- 卡片：第 1 张固定是「项目概况」（icon 用 star）：写总 Star 数、本周涨星、主要编程语言、开源协议（材料里有的才写）；其余卡片分别讲功能亮点、适合谁、怎么用。\n- title 写成「项目名：一句话定位」，不超过 24 字；short 用项目名（太长就缩写）；sourceLine 填空字符串（程序会自动填仓库名和 Star 数）；coverTitle 用项目名加 2–4 字定位。\n- 只根据 README 和材料写；README 里的宣传说法要客观转述（「作者称」），不要夸大。",
+      "lengthGuide": "项目介绍：口播 120–200 字（5–7 句），卡片 4 张",
+      "introTitle": "本周 GitHub 热门 AI 项目",
+      "introLead": "本周最值得关注的项目是",
+      "outroFirst": "以上就是本周的全部项目。",
+      "outroLine": "觉得有用的话，欢迎点赞关注，我们下周日见！",
+      "outroTitle": "本周的项目就介绍到这里",
+      "outroSub": "感谢收看，我们下周日见",
+      "outroChip": "每周日更新 · 欢迎关注",
+      "descLead": "本周 GitHub 热门 AI 开源项目",
+      "tags": [
+        "GitHub",
+        "开源项目"
+      ]
+    }
+  },
+  "video": {
+    "stories": {
+      "min": 14,
+      "max": 22
+    },
+    "subtitleMaxChars": 22,
+    "windowHours": 30
+  },
+  "select": {
+    "_doc": "politicsFilter: when true, stories the AI flags as political (or unsure) stop at topic review for a human decision, even with --auto.",
+    "politicsFilter": true
+  },
+  "tts": {
+    "_doc": "provider: edge (Microsoft Edge voices, free, no GPU, default) | qwen3 (local Qwen3-TTS voice cloning, free, needs an NVIDIA GPU) | gptsovits (local GPT-SoVITS, free, needs a GPU) | minimax (paid API). Local paths go in config.local.json. See docs/setup.md.",
+    "provider": "edge",
+    "voice": "zh-CN-XiaoxiaoNeural",
+    "rate": "+6%",
+    "pitch": "+0Hz",
+    "volume": "+0%",
+    "concurrency": 4,
+    "qwen3": {
+      "_doc": "python: full path of python.exe in your qwen3-tts environment; model: model folder or Hugging Face id; voice: folder name under voices/ containing voice.json + sample.wav; minSim/tries: automatic voice-similarity check and retries; speed: playback speed (1 = normal).",
+      "python": "",
+      "model": "",
+      "voice": "",
+      "pause": 0.22,
+      "speed": 1,
+      "minSim": 0.985,
+      "tries": 4
+    },
+    "gptsovits": {
+      "_doc": "dir: unpacked GPT-SoVITS folder (contains api_v2.py); voice: folder name under voices/.",
+      "dir": "",
+      "voice": "",
+      "speed": 1,
+      "port": 9880
+    },
+    "minimax": {
+      "_doc": "Paid. Put apiKey in config.local.json.",
+      "model": "speech-02-hd",
+      "voiceId": "female-chengshu",
+      "speed": 1.05
+    }
+  },
+  "llm": {
+    "_doc": "Text model for topic selection and script writing. provider: openai = any OpenAI-compatible API (default; DeepSeek shown, see https://api-docs.deepseek.com) | codex (Codex CLI) | antigravity (agy CLI). The key is read from config.local.json llm.apiKey, or env LLM_API_KEY. Env LLM_BASE_URL / LLM_MODEL override baseUrl / model. vision: OpenAI-compatible model that reads images to drop unrelated pictures; usually set with env LLM_VISION_MODEL (default in .env.example: deepseek-flash), reusing baseUrl and key; or {baseUrl, model, apiKeyEnv} here. Not set = skip that check. fallback: another provider to try when the main one fails (\"\" = none). batchSize/concurrency: stories per request / requests in parallel.",
+    "provider": "openai",
+    "baseUrl": "https://api.deepseek.com",
+    "model": "deepseek-v4-pro",
+    "reasoningEffort": "high",
+    "apiKeyEnv": "LLM_API_KEY",
+    "vision": null,
+    "fallback": "",
+    "batchSize": 1,
+    "concurrency": 6
+  },
+  "render": {
+    "_doc": "engine: remotion = vertical 1080x1920 (maintained) | chrome = older horizontal 1920x1080 template (not maintained, may need fixes). workers/crf apply to chrome only. portrait.conclusion: extra one-line summary card after each story. portrait.bgm.file: background music path relative to the repo root (\"\" = none; use music you have the rights to). portrait.loudness: target LUFS of the final video.",
+    "engine": "remotion",
+    "portrait": {
+      "conclusion": false,
+      "bgm": {
+        "file": "",
+        "gainDb": -10,
+        "fadeIn": 1.5,
+        "fadeOut": 3,
+        "crossfade": 3
+      },
+      "loudness": -16
+    },
+    "workers": 4,
+    "crf": 20
+  },
+  "enrich": {
+    "_doc": "screenshots: capture article pages as images. imageCheck: let the vision model (llm.vision) drop unrelated pictures and write captions; skipped automatically when no vision model is configured.",
+    "screenshots": true,
+    "imageCheck": true
+  },
+  "audio": {
+    "bgm": "",
+    "bgmVolume": 0.06
+  },
+  "metadata": {
+    "_doc": "Text written into the export package (runs/<run>/package/metadata.txt): baseTags are added to every episode; aiStatement ends the description.",
+    "baseTags": [
+      "AI",
+      "人工智能",
+      "大模型",
+      "AI资讯",
+      "科技"
+    ],
+    "aiStatement": "本视频由 AI 辅助整理资讯、撰写文稿并合成配音，信息以原文为准，欢迎指正。"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "auto-news-shorts",
+  "version": "0.1.0",
+  "description": "Turn daily AI/tech news into vertical short videos, mostly free: multi-source collection, LLM scripting, free TTS, Remotion rendering.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.9"
+  },
+  "scripts": {
+    "setup": "node --env-file-if-exists=.env src/setup.mjs",
+    "workbench": "node --env-file-if-exists=.env src/workbench/server.mjs --open",
+    "daily": "node --env-file-if-exists=.env src/main.mjs run --column news",
+    "weekly": "node --env-file-if-exists=.env src/main.mjs run --column github",
+    "studio": "remotion studio remotion/index.ts",
+    "check": "tsc --noEmit",
+    "lint": "eslint remotion && tsc --noEmit",
+    "test": "node --test --experimental-test-module-mocks \"tests/*.test.mjs\"",
+    "audit": "node scripts/audit.mjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.536",
+    "@remotion/zod-types": "4.0.536",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.536",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@remotion/eslint-config-flat": "4.0.536",
+    "@types/react": "19.2.7",
+    "@types/web": "0.0.166",
+    "eslint": "10.12.0",
+    "prettier": "3.8.1",
+    "typescript": "5.9.3"
+  },
+  "allowScripts": {
+    "esbuild": false
+  }
+}

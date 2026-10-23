@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<script src="icons.js"></script>
+<style>
+  :root{--ink:#122039;--blue:#2F6BFF;--deep:#1C4FD6;--muted:#6C7C98;
+    --font:"HarmonyOS Sans SC","MiSans","Source Han Sans SC","Noto Sans SC","Noto Sans CJK SC","Microsoft YaHei UI","Microsoft YaHei","PingFang SC",sans-serif;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:1920px;height:1080px;overflow:hidden;font-family:var(--font);background:#F4F8FF}
+  #c{position:absolute;inset:0;overflow:hidden;
+     background:radial-gradient(900px 700px at 100% 0%, #CFE0FF 0%, rgba(207,224,255,0) 70%),
+                radial-gradient(800px 600px at 0% 100%, #DDEAFF 0%, rgba(221,234,255,0) 70%),
+                linear-gradient(160deg,#F9FBFF 0%,#EDF3FF 100%)}
+  .dots{position:absolute;inset:0;background-image:radial-gradient(rgba(47,107,255,.13) 2px, transparent 2.2px);background-size:40px 40px}
+  .ring{position:absolute;border-radius:50%;border:2px solid rgba(47,107,255,.14)}
+  .brand{position:absolute;left:250px;top:96px;display:flex;align-items:center;gap:18px}
+  .brand .logo{width:78px;height:78px;border-radius:22px;background:linear-gradient(135deg,#3C7BFF,#1C4FD6);color:#fff;font-weight:900;font-size:36px;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 26px rgba(47,107,255,.35)}
+  .brand .name{font-size:48px;font-weight:800;color:var(--ink);letter-spacing:2px}
+  .date{position:absolute;left:250px;top:210px;display:flex;align-items:baseline;gap:26px}
+  .date .d{font-size:150px;font-weight:900;color:var(--deep);letter-spacing:2px;line-height:1}
+  .date .w{font-size:52px;font-weight:700;color:var(--blue)}
+  .heads{position:absolute;left:250px;top:420px;width:980px;display:flex;flex-direction:column;gap:26px}
+  .head{display:flex;align-items:center;gap:22px;background:#fff;border-radius:24px;padding:22px 34px;box-shadow:0 14px 36px rgba(30,70,160,.12);border:2px solid #E3ECFB}
+  .head .n{flex:none;width:58px;height:58px;border-radius:16px;background:var(--blue);color:#fff;font-size:36px;font-weight:900;display:flex;align-items:center;justify-content:center}
+  .head .t{font-size:64px;font-weight:900;color:var(--ink);white-space:nowrap;letter-spacing:1px}
+  .pic{position:absolute;left:1270px;top:300px;width:520px;transform:rotate(3deg);background:#fff;padding:14px;border-radius:24px;box-shadow:0 30px 70px rgba(20,50,120,.25)}
+  .pic .box{width:492px;height:360px;border-radius:14px;overflow:hidden;background:#EEF3FB}
+  .pic img{width:100%;height:100%;object-fit:cover}
+  .count{position:absolute;left:1290px;top:740px;display:inline-flex;align-items:center;gap:14px;background:var(--blue);color:#fff;font-size:40px;font-weight:800;padding:16px 32px;border-radius:40px;box-shadow:0 12px 28px rgba(47,107,255,.35)}
+  .count svg{width:40px;height:40px}
+</style>
+</head>
+<body>
+<div id="c"><div class="dots"></div>
+  <div class="ring" style="width:620px;height:620px;right:-160px;top:-220px"></div>
+  <div class="ring" style="width:420px;height:420px;right:-60px;top:-120px"></div>
+</div>
+<script>
+function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+window.__init = async function(d){
+  const c = document.getElementById('c');
+  const heads = (d.headlines || []).slice(0, 3);
+  c.insertAdjacentHTML('beforeend', `
+    <div class="brand"><div class="logo">AI</div><div class="name">${esc(d.channel)}</div></div>
+    <div class="date"><div class="d">${esc(d.dateBig)}</div><div class="w">${esc(d.weekday)}</div></div>
+    <div class="heads">${heads.map((h,i)=>`<div class="head"><div class="n">${i+1}</div><div class="t">${esc(h)}</div></div>`).join('')}</div>
+    ${d.image ? `<div class="pic"><div class="box"><img src="${esc(d.image)}"></div></div>` : ''}
+    <div class="count" style="${d.image ? '' : 'top:420px'}"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${(window.ICONS||{})['list-checks']||''}</svg>${esc(d.countText || `今日 ${d.count} 条速览`)}</div>`);
+  // fit headline text
+  for (const t of c.querySelectorAll('.head .t')) { let s = 64; while (t.scrollWidth > 860 && s > 40) { s -= 2; t.style.fontSize = s + 'px'; } }
+  const img = c.querySelector('.pic img');
+  if (img) await new Promise(r => { if (img.complete) r(); img.onload = r; img.onerror = () => { img.closest('.pic').remove(); r(); }; });
+  await document.fonts.ready;
+  return true;
+};
+</script>
+</body>
+</html>

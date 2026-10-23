@@ -1,0 +1,25 @@
+{
+  "_doc": "Copy this file to config.local.json and fill in what you need. config.local.json is git-ignored; keys here override config.json.",
+  "llm": {
+    "apiKey": ""
+  },
+  "render": {
+    "chromePath": "",
+    "ffmpegPath": ""
+  },
+  "tts": {
+    "python": "",
+    "qwen3": {
+      "python": "",
+      "model": "",
+      "voice": ""
+    },
+    "gptsovits": {
+      "dir": "",
+      "voice": ""
+    },
+    "minimax": {
+      "apiKey": ""
+    }
+  }
+}

@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>每日AI资讯 · 工作台</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#1d2129;--sub:#6b7280;--line:#e3e6eb;--brand:#2563eb;--brand2:#dbe7ff;--ok:#16a34a;--warn:#d97706;--bad:#dc2626;--chip:#eef1f5}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 "Microsoft YaHei","PingFang SC",system-ui,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:10px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+header h1{font-size:17px;margin:0 8px 0 0}
+select,input[type=text],input[type=number],input[type=url],textarea{border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:#fff}
+textarea{width:100%;resize:vertical}
+input[type=text],input[type=url]{width:100%}
+.btn{border:1px solid var(--line);background:#fff;border-radius:6px;padding:6px 14px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--brand)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.danger{color:var(--bad)}
+.btn.small{padding:2px 8px;font-size:12px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;background:var(--chip);font-size:12px}
+.pill.run{background:#fff4d6;color:#8a5a00}.pill.wait{background:var(--brand2);color:#1e40af}.pill.ok{background:#dcfce7;color:#166534}.pill.bad{background:#fee2e2;color:#991b1b}
+/* 三大模块 */
+.modules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 20px 0}
+@media(max-width:900px){.modules{grid-template-columns:1fr}}
+.mod{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.mod.on{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand2)}
+.mod h2{font-size:15px;margin:0 0 6px;display:flex;align-items:center;gap:8px}
+.mod h2 .num{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--brand);color:#fff;font-size:12px}
+.mod .steps{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.mod .st{border:1px solid var(--line);background:#fff;border-radius:6px;padding:3px 10px;font-size:12px;cursor:pointer;color:var(--sub)}
+.mod .st.done{color:var(--ok)}
+.mod .st.now{background:#fffbeb;border-color:#fcd34d;color:#92400e;font-weight:600}
+.mod .st.on{background:var(--brand2);border-color:var(--brand);color:#1e40af;font-weight:600}
+.switch{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--sub);cursor:pointer;user-select:none}
+.switch input{width:16px;height:16px}
+main{background:var(--card);margin:12px 20px 20px;border:1px solid var(--line);border-radius:10px;padding:16px;min-height:300px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.bar .grow{flex:1}
+.note{background:#f8fafc;border:1px solid var(--line);border-radius:6px;padding:8px 12px;color:var(--sub);font-size:13px;margin-bottom:12px}
+.note.warn{background:#fffbeb;border-color:#fde68a;color:#92400e}
+.cols{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px}
+.cols2{display:grid;grid-template-columns:230px minmax(0,1fr) 300px;gap:14px}
+@media(max-width:1100px){.cols,.cols2{grid-template-columns:1fr}}
+h3{font-size:15px;margin:4px 0 8px}
+.list{border:1px solid var(--line);border-radius:8px;max-height:68vh;overflow:auto}
+.row{border-bottom:1px solid var(--line);padding:8px 10px}
+.row:last-child{border-bottom:none}
+.row.picked{background:#f0fdf4}
+.row .t{font-weight:600}
+.row .m{font-size:12px;color:var(--sub)}
+.row .en{font-size:12px;color:#9ca3af;line-height:1.35}.row .zh{font-size:13px;color:var(--ink)}
+a{color:var(--brand);text-decoration:none}
+.chap{background:#f1f5f9;font-weight:600;padding:4px 10px;font-size:12px;color:#334155;border-bottom:1px solid var(--line)}
+.flex{display:flex;gap:8px;align-items:center}
+.flex .grow{flex:1;min-width:0}
+.side-list button{display:block;width:100%;text-align:left;border:none;border-bottom:1px solid var(--line);background:#fff;padding:8px 10px;cursor:pointer}
+.side-list button.on{background:var(--brand2)}
+.side-list button small{color:var(--sub);display:block}
+.field{margin-bottom:10px}
+.field label{display:block;font-size:12px;color:var(--sub);margin-bottom:2px}
+.cnt{font-size:12px;color:var(--sub)}.cnt.over{color:var(--bad);font-weight:600}
+.sent{display:grid;grid-template-columns:24px minmax(0,1fr) 120px 26px;gap:6px;align-items:start;margin-bottom:6px}
+.sent .n{color:var(--sub);font-size:12px;padding-top:7px;text-align:right}
+.cardbox{display:grid;grid-template-columns:130px 150px minmax(0,1fr) 26px;gap:6px;margin-bottom:6px}
+.media{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:8px}
+.media figure{margin:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#fafafa}
+.media img{width:100%;height:100px;object-fit:cover;display:block}
+.media figcaption{display:flex;gap:4px;padding:4px;align-items:center;font-size:11px;color:var(--sub)}
+.media .aicap{padding:0 4px 4px;font-size:11px;color:var(--sub);line-height:1.4}
+.media figure.rej{opacity:.55;border-style:dashed}.media figure.rej:hover{opacity:1}
+.src{font-size:12px;margin-bottom:8px}
+.src a{word-break:break-all}
+video,.cover{width:100%;border-radius:8px;border:1px solid var(--line);background:#000}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.tag{background:var(--chip);border-radius:99px;padding:2px 4px 2px 10px;font-size:12px}
+.tag button{border:none;background:none;cursor:pointer;color:var(--sub)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+th{color:var(--sub);font-weight:normal;background:#f8fafc}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.warnc{color:var(--warn)}
+.vbox{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:10px}
+.vbox.ok{border-color:#bbf7d0;background:#f0fdf4;color:inherit}.vbox.mismatch{border-color:#fecaca;background:#fef2f2;color:inherit}.vbox.error{border-color:#fde68a;background:#fffbeb;color:inherit}
+.vbox table{margin:6px 0;background:#fff}.vbox td:first-child{white-space:nowrap}.vbox tr.no td{color:var(--bad);font-weight:600}
+.vbox img{max-width:100%;max-height:220px;border:1px solid var(--line);border-radius:6px;margin-top:6px;cursor:zoom-in}
+.seg{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:10px}
+.seg audio{width:100%;height:34px;margin:4px 0}
+.vs{display:grid;grid-template-columns:34px minmax(0,1fr) 90px;gap:6px;align-items:center;padding:3px 0;border-top:1px dashed var(--line)}
+.vs.playing{background:#eff6ff}
+.frames{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.frames figure{margin:0}.frames img{width:100%;border-radius:6px;border:1px solid var(--line);cursor:zoom-in}
+.frames figcaption{font-size:12px;color:var(--sub)}
+pre.log{background:#0f172a;color:#cbd5e1;border-radius:8px;padding:10px;font-size:12px;max-height:260px;overflow:auto;white-space:pre-wrap;margin:0}
+details.logs{margin:0 20px 30px}
+details.logs summary{cursor:pointer;color:var(--sub);margin-bottom:6px}
+.empty{color:var(--sub);padding:30px;text-align:center}
+#toast{position:fixed;right:20px;bottom:20px;background:#111827;color:#fff;padding:10px 16px;border-radius:8px;display:none;max-width:420px;z-index:9}
+#toast.bad{background:var(--bad)}
+dialog{border:1px solid var(--line);border-radius:10px;padding:18px;max-width:760px;width:92vw}
+dialog::backdrop{background:rgba(0,0,0,.3)}
+.srcgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px 12px;max-height:50vh;overflow:auto;border:1px solid var(--line);border-radius:6px;padding:8px;margin:8px 0}
+.srcgrid label{font-size:13px;display:flex;gap:6px;align-items:center}
+#zoom{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;place-items:center;z-index:20;cursor:zoom-out}
+#zoom img{max-width:95vw;max-height:92vh}
+</style>
+</head>
+<body>
+<header>
+  <h1>每日AI资讯 · 工作台</h1>
+  <label>期数 <select id="runSel"></select></label>
+  <button class="btn" id="newBtn" title="选来源、采集新闻">开始新的一期</button>
+  <span id="statePill" class="pill">载入中…</span>
+</header>
+<div class="modules" id="modules"></div>
+<main id="main"><div class="empty">载入中…</div></main>
+<details class="logs" id="logs"><summary>运行记录（程序每一步在做什么）</summary><pre class="log" id="logBox"></pre></details>
+<div id="toast"></div>
+<div id="zoom"><img alt=""></div>
+<dialog id="newDlg">
+  <h3>开始新的一期</h3>
+  <div class="field"><label>板块</label><select id="newCol" style="width:100%"></select></div>
+  <div class="field"><label>名字（默认「今天的日期-板块」；同一天想做第二版可以在后面加 -b）</label><input type="text" id="newName"></div>
+  <div class="flex"><b class="grow">从哪些来源采集</b><button class="btn small" data-sel="all">全选</button><button class="btn small" data-sel="official">只要官方</button><button class="btn small" data-sel="zh">只要中文</button><button class="btn small" data-sel="none">全不选</button></div>
+  <div class="srcgrid" id="srcGrid"></div>
+  <div class="note" id="newNote"></div>
+  <div class="bar"><span class="grow"></span><button class="btn" id="newCancel">取消</button><button class="btn primary" id="newGo">开始采集</button></div>
+</dialog>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const R = () => encodeURIComponent(RUN);
+const fileUrl = (src, t) => `/files/${R()}/${src.split('/').map(encodeURIComponent).join('/')}${t ? '?t=' + t : ''}`;
+let RUN = null, OV = null, STEP = localStorage.getItem('wb-step') || 'select', DIRTY = false;
+let COL = null, SEL = null, WR = null, VO = null, STL = null, PUB = null, CUR = 0;
+
+function toast(msg, bad) { const t = $('#toast'); t.textContent = msg; t.className = bad ? 'bad' : ''; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', bad ? 7000 : 3500); }
+async function api(url, opt = {}) {
+  const r = await fetch(url, {...opt, headers: {'Content-Type': 'application/json'}, body: opt.body ? JSON.stringify(opt.body) : undefined});
+  const j = await r.json().catch(() => ({error: '服务没有响应'}));
+  if (!r.ok) throw new Error(j.error || ('出错了 ' + r.status));
+  return j;
+}
+const busy = () => !!OV?.job?.running;
+const markDirty = (v = true) => { DIRTY = v; };
+window.addEventListener('beforeunload', e => { if (DIRTY) { e.preventDefault(); e.returnValue = ''; } });
+const count = (n, max) => `<span class="cnt ${n > max ? 'over' : ''}">${n}/${max}</span>`;
+const mmss = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+function emptyStage(msg) { $('#main').innerHTML = `<div class="empty">${msg}</div>`; }
+document.addEventListener('click', e => { if (e.target.matches('.frames img, .zoomable')) { $('#zoom img').src = e.target.src; $('#zoom').style.display = 'grid'; } });
+$('#zoom').onclick = () => $('#zoom').style.display = 'none';
+
+// ---------- 三大模块与小步 ----------
+const MODULES = [
+  {n: 1, name: '信息采集', key: 'collectReview', sw: '采集、AI 选题后停下，等我审核', steps: [{k: 'collect', t: '采集记录'}, {k: 'select', t: '选题审核'}]},
+  {n: 2, name: '视频编辑', key: 'editReview', sw: '写稿后、配音后停下，等我审核', steps: [{k: 'write', t: '稿子与配图'}, {k: 'voice', t: '配音试听'}, {k: 'stills', t: '画面预览'}]},
+  {n: 3, name: '导出', key: null, sw: '', steps: [{k: 'publish', t: '标题简介与素材包'}]},
+];
+const STAGE_STEP = {collect: 'collect', select: 'select', 'review-select': 'select', enrich: 'write', write: 'write', 'review-write': 'write', voice: 'voice', 'review-voice': 'voice', stills: 'stills', 'review-stills': 'stills', render: 'stills', 'review-render': 'publish', export: 'publish', done: 'publish'};
+function stepDone(k) {
+  const h = OV.has;
+  return {collect: h.candidates, select: h.written, write: h.voice, voice: h.video || h.stills, stills: h.video, publish: !!OV.package}[k];
+}
+function renderModules() {
+  const now = STAGE_STEP[OV.status.stage] || null;
+  const wf = OV.workflow;
+  $('#modules').innerHTML = MODULES.map(m => `
+    <div class="mod ${m.steps.some(s => s.k === STEP) ? 'on' : ''}">
+      <h2><span class="num">${m.n}</span>${m.name}</h2>
+      <div class="steps">${m.steps.map(s => `<button class="st ${stepDone(s.k) ? 'done' : ''} ${s.k === now && /^review-|done/.test(OV.status.stage) ? 'now' : ''} ${s.k === STEP ? 'on' : ''}" data-step="${s.k}">${stepDone(s.k) ? '✓ ' : ''}${s.t}</button>`).join('')}</div>
+      ${m.key ? `<label class="switch" title="不勾：AI 做完这一块直接往下走（全自动）；勾上：做完停下等你"><input type="checkbox" data-wf="${m.key}" ${wf[m.key] ? 'checked' : ''}>${m.sw}</label>` : ''}
+    </div>`).join('');
+  document.querySelectorAll('[data-step]').forEach(b => b.onclick = () => go(b.dataset.step));
+  document.querySelectorAll('[data-wf]').forEach(c => c.onchange = async () => {
+    try { OV.workflow = await api('/api/workflow', {method: 'PUT', body: {[c.dataset.wf]: c.checked}}); toast(c.checked ? '已打开：这一块做完会停下等你' : '已关闭：这一块 AI 做完直接往下走'); }
+    catch (e) { toast(e.message, true); c.checked = !c.checked; }
+  });
+}
+function go(step) {
+  if (step === STEP) return;
+  if (DIRTY && !confirm('有改动还没保存，确定离开这一页吗？（刷新网页会丢）')) return;
+  STEP = step; localStorage.setItem('wb-step', STEP); renderModules(); renderStep();
+}
+
+// ---------- 顶部 ----------
+async function loadRuns(select) {
+  const {runs, today} = await api('/api/runs');
+  const sel = $('#runSel');
+  sel.innerHTML = runs.map(r => `<option value="${esc(r.name)}">${esc(r.name)}${r.exported ? '（已导出）' : ''}</option>`).join('') || '<option value="">还没有任何一期</option>';
+  RUN = select || (runs.find(r => r.name === RUN) || runs[0] || {}).name || null;
+  if (RUN) sel.value = RUN;
+  $('#newBtn').dataset.today = today;
+}
+function renderTop() {
+  const st = OV.status, job = OV.job, pill = $('#statePill');
+  if (job?.running) { pill.className = 'pill run'; pill.textContent = `正在${job.label}：${st.message || '…'}`; }
+  else if (st.stage === 'error') { pill.className = 'pill bad'; pill.textContent = '出错：' + (st.message || '').slice(0, 60); }
+  else if (st.stage === 'done' && OV.package) { pill.className = 'pill ok'; pill.textContent = '已导出素材包'; }
+  else if (/^review-/.test(st.stage)) { pill.className = 'pill wait'; pill.textContent = st.message; }
+  else { pill.className = 'pill'; pill.textContent = st.message || '还没开始'; }
+  $('#logBox').textContent = (OV.log || '（还没有记录）') + (OV.jobLog && st.stage === 'error' ? '\n---- 程序输出 ----\n' + OV.jobLog : '');
+  $('#newBtn').disabled = busy();
+}
+async function refreshOverview() {
+  if (!RUN) { $('#statePill').textContent = '还没有期数'; emptyStage('还没有任何一期。点上方的「开始新的一期」。'); return; }
+  const wasBusy = busy();
+  OV = await api('/api/runs/' + R());
+  renderTop(); renderModules();
+  return wasBusy && !busy();
+}
+async function act(action, extra = {}) {
+  try { const j = await api(`/api/runs/${R()}/action`, {method: 'POST', body: {action, ...extra}}); toast('已开始：' + j.label + '。可以关掉网页，程序会在后台继续。'); $('#logs').open = true; await refreshOverview(); renderStep(); }
+  catch (e) { toast(e.message, true); }
+}
+const runningNote = () => busy() ? `<div class="note warn">后台正在${esc(OV.job.label)}（${esc(OV.status.message || '')}），做完会自动刷新。</div>` : '';
+
+// ========== 模块一：信息采集 ==========
+async function loadCollect() { COL = await api(`/api/runs/${R()}/collect`); }
+function renderCollect() {
+  if (!OV.has.report) return emptyStage(busy() ? '正在采集，完成后这里会列出每个来源的结果。' : '这一期还没有采集。点上方的「开始新的一期」。');
+  const failed = COL.report.filter(r => !r.ok);
+  $('#main').innerHTML = runningNote() + `
+    <div class="note">这里是这一期从各个来源抓到了什么。失败的来源可以勾上重试；也可以勾任何来源重新抓一遍。重试只会把新抓到的加进候选，不会动已有的。</div>
+    <div class="bar"><b>共 ${COL.total} 条候选 · ${COL.report.filter(r => r.ok).length}/${COL.report.length} 个来源成功</b>${failed.length ? `<span class="pill bad">${failed.length} 个失败</span>` : ''}<span class="grow"></span>
+      <button class="btn" id="reBtn" ${busy() ? 'disabled' : ''}>重新采集勾选的来源</button>
+      <button class="btn" id="reselBtn" ${busy() ? 'disabled' : ''} title="候选变多以后，可以让 AI 按新的候选重新选一版">重新让 AI 选题</button>
+      <button class="btn primary" id="toSel">去审核选题 →</button></div>
+    <table><thead><tr><th></th><th>来源</th><th>状态</th><th>抓到</th><th>留下（AI 相关）</th><th>说明</th></tr></thead><tbody>
+    ${COL.report.map(r => `<tr><td><input type="checkbox" data-src="${esc(r.id)}" ${r.ok ? '' : 'checked'}></td><td>${esc(r.name)} <span class="cnt">${esc(r.kind)}</span></td>
+      <td>${r.ok ? '<span class="ok">成功</span>' : '<span class="bad">失败</span>'}</td><td>${r.raw ?? '-'}</td><td>${r.kept ?? '-'}</td><td class="cnt">${esc(r.error || (r.ms ? (r.ms / 1000).toFixed(1) + ' 秒' : ''))}</td></tr>`).join('')}
+    </tbody></table>
+    ${COL.manual.length ? `<h3 style="margin-top:14px">你手动加的新闻</h3>${COL.manual.map(i => `<div class="src"><a href="${esc(i.url)}" target="_blank">${esc(i.title)}</a></div>`).join('')}` : ''}
+    ${COL.warnings.length ? `<details style="margin-top:10px"><summary class="cnt">采集时的提示（${COL.warnings.length}）</summary><pre class="log">${esc(COL.warnings.join('\n'))}</pre></details>` : ''}`;
+  $('#toSel').onclick = () => go('select');
+  $('#reBtn').onclick = () => { const ids = [...document.querySelectorAll('[data-src]:checked')].map(c => c.dataset.src); if (!ids.length) return toast('先勾选要重新采集的来源', true); act('recollect', {sources: ids}); };
+  $('#reselBtn').onclick = () => { if (confirm('让 AI 按现在的全部候选重新选一版？\n你在「选题审核」里做的调整会被覆盖（AI 第一次的原版有备份）。')) act('reselect'); };
+}
+
+async function loadSelection() { SEL = await api(`/api/runs/${R()}/selection`); SEL.filter = ''; SEL.onlyNew = true; }
+function renderSelection() {
+  if (!OV.has.selected) return emptyStage(busy() ? '正在采集和选题，完成后这里会出现 AI 选的新闻。' : (OV.has.candidates ? '还没有选题结果。' : '这一期还没有采集。点上方的「开始新的一期」。'));
+  const picked = new Set(SEL.stories.flatMap(s => s.items.map(i => i.id)));
+  const byCh = SEL.chapters.map(ch => [ch, SEL.stories.map((s, i) => [s, i]).filter(([s]) => s.chapter === ch)]).filter(([, l]) => l.length);
+  const left = byCh.map(([ch, list]) => `<div class="chap">${esc(ch)}（${list.length}）</div>` + list.map(([s, i]) => `
+    <div class="row">
+      <div class="flex"><input type="text" class="grow" value="${esc(s.workingTitle)}" data-i="${i}" data-f="workingTitle" title="工作标题（写稿时给 AI 参考）">
+        <select data-i="${i}" data-f="chapter">${SEL.chapters.map(c => `<option ${c === s.chapter ? 'selected' : ''}>${c}</option>`).join('')}</select>
+        <input type="number" min="1" max="10" style="width:56px" value="${s.importance}" data-i="${i}" data-f="importance" title="重要程度 1–10（越高稿子越长）">
+        <button class="btn small" data-up="${i}" title="上移">↑</button><button class="btn small" data-down="${i}" title="下移">↓</button>
+        <button class="btn small danger" data-del="${i}">去掉</button></div>
+      <div class="m">${esc(s.reason)}${s.heat ? ' ｜ ' + esc(s.heat) : ''}</div>
+      <div class="m">${s.items.slice(0, 3).map(it => it.titleZh ? `<a href="${esc(it.url)}" target="_blank"><b>[${esc(it.sourceName)}] ${esc(it.titleZh.slice(0, 60))}</b></a><div class="en">${esc(it.title.slice(0, 120))}</div>` : `<a href="${esc(it.url)}" target="_blank">[${esc(it.sourceName)}] ${esc(it.title.slice(0, 70))}</a>`).join('<br>')}${s.items.length > 3 ? `<br>…等 ${s.items.length} 篇报道` : ''}</div>
+    </div>`).join('')).join('');
+  const f = SEL.filter.toLowerCase();
+  const groups = SEL.groups.filter(g => !(SEL.onlyNew && g.items.some(i => picked.has(i.id)))).filter(g => !f || g.items.some(i => (i.title + i.sourceName + i.summary + (i.titleZh || '') + (i.summaryZh || '')).toLowerCase().includes(f)));
+  const right = groups.slice(0, 250).map(g => `
+    <div class="row ${g.items.some(i => picked.has(i.id)) ? 'picked' : ''}">
+      <div class="flex"><div class="grow">${g.items[0].titleZh ? `<div class="t">${esc(g.items[0].titleZh)}</div><div class="en">${esc(g.items[0].title)}</div>` : `<div class="t">${esc(g.items[0].title)}</div>`}</div>${g.items.some(i => picked.has(i.id)) ? '<span class="pill ok">已选</span>' : `<button class="btn small primary" data-add="${g.key}">＋ 加入</button>`}</div>
+      <div class="m">热度 ${g.score} ｜ ${esc(g.heat)}</div>
+      ${g.items[0].summaryZh ? `<div class="zh">${esc(g.items[0].summaryZh)}</div><div class="en">${esc(g.items[0].summary)}</div>` : g.items[0].summary ? `<div class="m">${esc(g.items[0].summary.slice(0, 150))}</div>` : ''}
+      <div class="m">${g.items.slice(0, 3).map(it => `<a href="${esc(it.url)}" target="_blank">[${esc(it.sourceName)}] 原文</a>`).join(' · ')}${g.items.length > 1 ? ` · 共 ${g.items.length} 篇` : ''}</div>
+    </div>`).join('');
+  $('#main').innerHTML = runningNote() + `
+    <div class="note">AI 先选好了一版${SEL.notes ? `（AI 的总结：${esc(SEL.notes)}）` : ''}。你可以去掉不想要的、从右边加入漏掉的、粘贴自己找到的新闻链接，改栏目和重要程度（重要程度高的稿子写得长）。同一事件的多家报道算一条。</div>
+    ${OV.has.written ? '<div class="note warn">这一期已经写过稿了。重新写稿会覆盖现在的稿子（第一次保存时 AI 原版已自动备份）。</div>' : ''}
+    <div class="bar"><b>本期采用 ${SEL.stories.length} 条</b><span class="grow"></span>
+      <button class="btn" id="selSave">只保存</button><button class="btn primary" id="selGo" ${busy() ? 'disabled' : ''}>保存，进入视频编辑（读原文 + 写稿）→</button></div>
+    <div class="cols">
+      <div><h3>本期采用</h3><div class="list">${left}</div></div>
+      <div>
+        <h3>加一条自己找到的新闻</h3>
+        <div class="flex" style="margin-bottom:6px"><input type="url" id="manUrl" class="grow" placeholder="粘贴新闻链接 https://…"><button class="btn small primary" id="manAdd">加入</button></div>
+        <input type="text" id="manTitle" placeholder="标题（可不填，程序会读网页标题）" style="margin-bottom:12px">
+        <h3 class="flex">全部候选（${SEL.groups.length} 组）<span class="grow"></span><button class="btn small" id="trBtn" title="用免费的 Bing 网页翻译把英文标题和摘要翻成中文（不占 AI 额度），只翻还没翻过的">${SEL.translated ? '补翻译' : '翻译成中文'}</button></h3>
+        <div class="bar"><input type="text" id="selFilter" class="grow" placeholder="搜索标题、来源…" value="${esc(SEL.filter)}"><label><input type="checkbox" id="onlyNew" ${SEL.onlyNew ? 'checked' : ''}> 只看没选的</label></div>
+        <div class="list">${right || '<div class="empty">没有符合的候选</div>'}</div></div>
+    </div>`;
+  const m = $('#main');
+  m.querySelectorAll('[data-f]').forEach(el => el.onchange = () => { const s = SEL.stories[el.dataset.i]; s[el.dataset.f] = el.dataset.f === 'importance' ? Number(el.value) : el.value; markDirty(); if (el.dataset.f === 'chapter') renderSelection(); });
+  m.querySelectorAll('[data-del]').forEach(el => el.onclick = () => { SEL.stories.splice(+el.dataset.del, 1); markDirty(); renderSelection(); });
+  const move = (i, d) => { const ch = SEL.stories[i].chapter; let j = i + d; while (j >= 0 && j < SEL.stories.length && SEL.stories[j].chapter !== ch) j += d; if (j < 0 || j >= SEL.stories.length) return; [SEL.stories[i], SEL.stories[j]] = [SEL.stories[j], SEL.stories[i]]; markDirty(); renderSelection(); };
+  m.querySelectorAll('[data-up]').forEach(el => el.onclick = () => move(+el.dataset.up, -1));
+  m.querySelectorAll('[data-down]').forEach(el => el.onclick = () => move(+el.dataset.down, 1));
+  m.querySelectorAll('[data-add]').forEach(el => el.onclick = () => { const g = SEL.groups.find(x => x.key === el.dataset.add); const ch = SEL.chapters[SEL.chapters.length - 1]; SEL.stories.push({chapter: ch, workingTitle: g.items[0].title.slice(0, 40), importance: 5, reason: '手动选入', heat: g.heat, items: g.items}); markDirty(); renderSelection(); toast(SEL.chapters.length > 1 ? `已加入「${ch}」，记得改一下栏目和标题` : '已加入，记得改一下标题和顺序'); });
+  $('#manAdd').onclick = async () => {
+    const url = $('#manUrl').value.trim(); if (!url) return toast('先粘贴链接', true);
+    $('#manAdd').disabled = true; $('#manAdd').textContent = '读取中…';
+    try {
+      const {item, existed} = await api(`/api/runs/${R()}/manual-item`, {method: 'POST', body: {url, title: $('#manTitle').value}});
+      if (picked.has(item.id)) { toast('这条已经在本期里了'); return renderSelection(); }
+      SEL.stories.push({chapter: SEL.chapters[SEL.chapters.length - 1], workingTitle: item.title.slice(0, 40), importance: 6, reason: '手动添加的新闻', heat: '', items: [item]}); markDirty();
+      toast((existed ? '候选里本来就有，' : '读到标题：') + item.title.slice(0, 30) + ' —— 已加入，记得改栏目'); renderSelection();
+    } catch (e) { toast(e.message, true); $('#manAdd').disabled = false; $('#manAdd').textContent = '加入'; }
+  };
+  $('#selFilter').oninput = e => { SEL.filter = e.target.value; clearTimeout(SEL._t); SEL._t = setTimeout(() => { renderSelection(); const i = $('#selFilter'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 250); };
+  $('#onlyNew').onchange = e => { SEL.onlyNew = e.target.checked; renderSelection(); };
+  $('#trBtn').onclick = async () => { // 只把中文合进现在的列表，不动你还没保存的调整
+    $('#trBtn').disabled = true; $('#trBtn').textContent = '翻译中…（约 1 分钟）';
+    try {
+      const r = await api(`/api/runs/${R()}/translate`, {method: 'POST'});
+      const fresh = await api(`/api/runs/${R()}/selection`);
+      const zh = new Map([...fresh.groups.flatMap(g => g.items), ...fresh.stories.flatMap(s => s.items)].map(i => [i.id, i]));
+      for (const it of [...SEL.groups.flatMap(g => g.items), ...SEL.stories.flatMap(s => s.items)]) { const z = zh.get(it.id); if (z) { it.titleZh = z.titleZh; it.summaryZh = z.summaryZh; } }
+      SEL.translated = fresh.translated; renderSelection();
+      toast(r.total ? `翻译了 ${r.done} 段${r.failed ? `，${r.failed} 段没翻成（只显示英文）` : ''}` : '都翻译过了');
+    } catch (e) { toast(e.message + (/接口不存在/.test(e.message) ? '（程序刚更新过，关掉工作台窗口，重新运行 npm run workbench 再试）' : ''), true); renderSelection(); }
+  };
+  const save = async () => { await api(`/api/runs/${R()}/selection`, {method: 'PUT', body: {stories: SEL.stories.map(s => ({chapter: s.chapter, workingTitle: s.workingTitle, importance: s.importance, reason: s.reason, itemIds: s.items.map(i => i.id)}))}}); markDirty(false); };
+  $('#selSave').onclick = async () => { try { await save(); toast('选题已保存'); await loadSelection(); renderSelection(); } catch (e) { toast(e.message, true); } };
+  $('#selGo').onclick = async () => {
+    const stop = OV.workflow.editReview ? '写完会停下等你检查稿子。' : '注意：「视频编辑」的开关没勾，写完会直接配音、渲染' + '，并导出素材包。';
+    if (!confirm(`保存这 ${SEL.stories.length} 条，然后开始读原文、写稿？\n大约需要 5–10 分钟。${stop}`)) return;
+    try { await save(); await act('after-select'); } catch (e) { toast(e.message, true); }
+  };
+}
+
+// ========== 模块二：视频编辑 ==========
+async function loadWritten() { WR = await api(`/api/runs/${R()}/written`); CUR = Math.min(CUR, WR.stories.length - 1); }
+function renderWritten() {
+  if (!OV.has.written) return emptyStage(busy() ? '正在读原文和写稿，写完这里会出现稿子。' : '还没有稿子。先在「信息采集 → 选题审核」里确认选题。');
+  const s = WR.stories[CUR];
+  const words = s.narration.reduce((a, n) => a + n.text.length, 0);
+  const cardOpts = n => `<option value="-1" ${n.card < 0 ? 'selected' : ''}>不对应卡片</option>` + s.cards.map((c, k) => `<option value="${k}" ${n.card === k ? 'selected' : ''}>卡片${k + 1} ${esc(c.heading)}</option>`).join('');
+  const used = new Set(s.media.map(m => m.url).filter(Boolean));
+  const srcImgs = [...new Set(s.sources.map(x => x.image).filter(u => u && !used.has(u)))];
+  $('#main').innerHTML = runningNote() + `
+    <div class="note">口播稿就是配音要念的字，一行一句；卡片是画面上的要点；配图会在讲到第 2、4 句时盖在画面上（最多 4 张）。改完点「保存」；都满意了点「保存并开始配音」。</div>
+    ${WR.skipped?.length ? `<div class="note warn">AI 觉得这几条原文材料不够，没有写稿：${WR.skipped.map(esc).join('、')}。不需要的话不用管；想要的话可以回「选题审核」换一篇来源更全的报道。</div>` : ''}
+    ${OV.stale.written ? '<div class="note warn">选题在写稿之后又改过，这些稿子可能对不上新选题。要按新选题重写，请回「选题审核」点「保存，进入视频编辑」。</div>' : ''}
+    <div class="bar"><b>共 ${WR.stories.length} 条</b><span class="grow"></span>
+      <button class="btn" id="wrSave">保存</button><button class="btn primary" id="wrGo" ${busy() ? 'disabled' : ''}>保存并开始配音 →</button></div>
+    <div class="cols2">
+      <div class="list side-list">${WR.stories.map((x, i) => `<button class="${i === CUR ? 'on' : ''}" data-pick="${i}">${i + 1}. ${esc(x.title)}<small>${esc(x.chapter)} · ${x.narration.length} 句 · ${x.media.length} 张图</small></button>`).join('')}</div>
+      <div>
+        <div class="flex" style="margin-bottom:8px"><h3 class="grow">${CUR + 1}. ${esc(s.chapter)}</h3>
+          <button class="btn small" id="wrUp" title="往前挪">↑</button><button class="btn small" id="wrDown" title="往后挪">↓</button>
+          <button class="btn small danger" id="wrDel">删掉这条新闻</button></div>
+        <div class="field"><label>画面标题 ${count(s.title.length, 24)}</label><input type="text" data-w="title" value="${esc(s.title)}"></div>
+        <div class="flex">
+          <div class="field grow"><label>进度条短标签 ${count(s.short.length, 6)}</label><input type="text" data-w="short" value="${esc(s.short)}"></div>
+          <div class="field grow"><label>封面标语（前 3 条会上封面）${count(s.coverTitle.length, 12)}</label><input type="text" data-w="coverTitle" value="${esc(s.coverTitle)}"></div>
+        </div>
+        <div class="flex">
+          <div class="field grow"><label>来源说明（显示在画面上）</label><input type="text" data-w="sourceLine" value="${esc(s.sourceLine)}"></div>
+          <div class="field grow"><label>B 站标签（逗号分隔，1–2 个）</label><input type="text" data-w="tags" value="${esc(s.tags.join('，'))}"></div>
+        </div>
+        ${s.hasTweet ? `<div class="field"><label>推文中文翻译（画面上的推文卡片）${count(s.tweetZh.length, 140)}</label><textarea rows="2" data-w="tweetZh">${esc(s.tweetZh)}</textarea></div>` : ''}
+        <h3>口播稿 <span class="cnt">${s.narration.length} 句 · ${words} 字</span></h3>
+        ${s.narration.map((n, k) => `<div class="sent"><span class="n">${k + 1}</span><textarea rows="1" data-n="${k}">${esc(n.text)}</textarea><select data-nc="${k}" title="这句话出现时高亮哪张卡片">${cardOpts(n)}</select><button class="btn small danger" data-ndel="${k}" title="删掉这句">×</button></div>`).join('')}
+        <button class="btn small" id="addSent">＋ 加一句</button>
+        <h3 style="margin-top:14px">卡片（屏幕上的要点，最多 6 张）</h3>
+        <div class="cnt" style="margin-bottom:4px">小标题建议 ≤9 字，正文建议 ≤46 字</div>
+        ${s.cards.map((c, k) => `<div class="cardbox"><select data-ci="${k}">${WR.icons.map(ic => `<option ${ic === c.icon ? 'selected' : ''}>${ic}</option>`).join('')}</select><input type="text" data-ch="${k}" value="${esc(c.heading)}" placeholder="小标题" style="${c.heading.length > 9 ? 'border-color:var(--warn)' : ''}"><input type="text" data-cb="${k}" value="${esc(c.body)}" placeholder="正文" style="${c.body.length > 46 ? 'border-color:var(--warn)' : ''}"><button class="btn small danger" data-cdel="${k}" title="删掉这张卡">×</button></div>`).join('')}
+        ${s.cards.length < 6 ? '<button class="btn small" id="addCard">＋ 加一张卡片</button>' : ''}
+        <h3 style="margin-top:14px">配图（${s.media.length}/4，第一张也可能用在封面上）</h3>
+        ${s.imageCheck === 'ok' ? '<div class="cnt">AI 已看过图：只留下和这条新闻直接相关的图，资料图、装饰插画等放在下面「AI 没选的图」里。</div>' : s.imageCheck === 'failed' ? '<div class="cnt warnc">⚠ AI 看图没成功，下面是按老规则自动挑的图，请自己看一眼有没有无关的。</div>' : ''}
+        <div class="media">${s.media.map((m, k) => `<figure><img class="zoomable" src="${fileUrl(m.src)}" loading="lazy"><figcaption>${m.w}×${m.h}<span class="grow" style="flex:1"></span><button class="btn small" data-mup="${k}" title="往前">↑</button><button class="btn small danger" data-mdel="${k}" title="不用这张">×</button></figcaption>${m.caption || m.ai ? `<div class="aicap">${esc(m.caption)}${m.sentence >= 0 ? `（第 ${m.sentence + 1} 句时弹出）` : ''}</div>` : ''}</figure>`).join('') || '<div class="cnt">没有配图（画面只显示卡片）</div>'}</div>
+        ${(s.rejected || []).length ? `<div class="cnt" style="margin-top:8px">⚠ AI 没选的图（觉得判错了可以「加回」）：</div><div class="media">${s.rejected.map((m, k) => `<figure class="rej"><img class="zoomable" src="${fileUrl(m.src)}" loading="lazy"><figcaption>${esc(({chart: '图表', product: '产品界面', official: '官方发布图', page: '网页截图', person: '人物', stock: '资料图', decorative: '装饰插画', unrelated: '无关', other: '其他'})[m.ai?.category] || '')}<span class="grow" style="flex:1"></span>${s.media.length < 4 ? `<button class="btn small" data-mback="${k}">加回</button>` : ''}</figcaption><div class="aicap">${esc(m.ai?.reason || '')}</div></figure>`).join('')}</div>` : ''}
+        ${s.media.length < 4 ? `<div class="flex"><label class="btn small">上传图片…<input type="file" id="imgFile" accept="image/png,image/jpeg,image/webp" hidden></label><span class="cnt">建议横图、宽 1000 像素以上；用别人的图注意版权</span></div>` : ''}
+        ${s.media.length < 4 && srcImgs.length ? `<div class="cnt" style="margin-top:8px">原文网页里的图片，点「用这张」加进来：</div><div class="media">${srcImgs.map(u => `<figure><img src="${esc(u)}" loading="lazy" referrerpolicy="no-referrer"><figcaption><button class="btn small" data-useimg="${esc(u)}">用这张</button></figcaption></figure>`).join('')}</div>` : ''}
+      </div>
+      <div>
+        <h3>原文核对</h3>
+        ${s.tweet ? `<div class="src"><b>推文 · ${esc(s.tweet.name)}</b><br>${esc(s.tweet.text.slice(0, 280))}</div>` : ''}
+        ${s.sources.map(x => `<div class="src"><b>${esc(x.site || '')}</b> <a href="${esc(x.url)}" target="_blank">${esc(x.title || x.url)}</a>${x.summary ? `<br><span class="cnt">${esc(x.summary)}</span>` : ''}</div>`).join('')}
+      </div>
+    </div>`;
+  const m = $('#main');
+  const grow = t => { t.style.height = 'auto'; t.style.height = t.scrollHeight + 2 + 'px'; };
+  m.querySelectorAll('textarea[data-n]').forEach(t => { grow(t); t.oninput = () => { s.narration[t.dataset.n].text = t.value; grow(t); markDirty(); }; });
+  m.querySelectorAll('[data-w]').forEach(el => { el.oninput = () => { const f = el.dataset.w; s[f] = f === 'tags' ? el.value.split(/[,，、\s]+/).filter(Boolean) : el.value; markDirty(); }; el.onchange = () => renderWritten(); });
+  m.querySelectorAll('[data-nc]').forEach(el => el.onchange = () => { s.narration[el.dataset.nc].card = Number(el.value); markDirty(); });
+  m.querySelectorAll('[data-ndel]').forEach(el => el.onclick = () => { s.narration.splice(+el.dataset.ndel, 1); markDirty(); renderWritten(); });
+  m.querySelectorAll('[data-ci]').forEach(el => el.onchange = () => { s.cards[el.dataset.ci].icon = el.value; markDirty(); });
+  m.querySelectorAll('[data-ch]').forEach(el => { el.oninput = () => { s.cards[el.dataset.ch].heading = el.value; markDirty(); }; el.onchange = () => renderWritten(); });
+  m.querySelectorAll('[data-cb]').forEach(el => { el.oninput = () => { s.cards[el.dataset.cb].body = el.value; markDirty(); }; el.onchange = () => renderWritten(); });
+  m.querySelectorAll('[data-cdel]').forEach(el => el.onclick = () => { const k = +el.dataset.cdel; s.cards.splice(k, 1); s.narration.forEach(n => { if (n.card === k) n.card = -1; else if (n.card > k) n.card--; }); markDirty(); renderWritten(); });
+  m.querySelectorAll('[data-pick]').forEach(el => el.onclick = () => { CUR = +el.dataset.pick; renderWritten(); });
+  m.querySelectorAll('[data-mdel]').forEach(el => el.onclick = () => { s.media.splice(+el.dataset.mdel, 1); markDirty(); renderWritten(); });
+  m.querySelectorAll('[data-mback]').forEach(el => el.onclick = () => { s.media.push(...s.rejected.splice(+el.dataset.mback, 1)); markDirty(); renderWritten(); toast('已加回，记得保存'); });
+  m.querySelectorAll('[data-mup]').forEach(el => el.onclick = () => { const k = +el.dataset.mup; if (k) { [s.media[k - 1], s.media[k]] = [s.media[k], s.media[k - 1]]; markDirty(); renderWritten(); } });
+  const addImg = async b => { try { toast('正在添加图片…'); s.media.push(await api(`/api/runs/${R()}/image`, {method: 'POST', body: {storyId: s.id, ...b}})); markDirty(); renderWritten(); toast('图片已加入，记得保存'); } catch (e) { toast(e.message, true); } };
+  m.querySelectorAll('[data-useimg]').forEach(el => el.onclick = () => addImg({url: el.dataset.useimg}));
+  if ($('#imgFile')) $('#imgFile').onchange = e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => addImg({data: r.result}); r.readAsDataURL(f); };
+  $('#addSent').onclick = () => { s.narration.push({text: '', card: -1}); markDirty(); renderWritten(); };
+  if ($('#addCard')) $('#addCard').onclick = () => { s.cards.push({icon: 'sparkles', heading: '', body: ''}); markDirty(); renderWritten(); };
+  const swap = d => { const j = CUR + d; if (j < 0 || j >= WR.stories.length) return; [WR.stories[CUR], WR.stories[j]] = [WR.stories[j], WR.stories[CUR]]; CUR = j; markDirty(); renderWritten(); };
+  $('#wrUp').onclick = () => swap(-1); $('#wrDown').onclick = () => swap(1);
+  $('#wrDel').onclick = () => { if (!confirm(`删掉「${s.title}」这条新闻？`)) return; WR.stories.splice(CUR, 1); CUR = Math.max(0, CUR - 1); markDirty(); renderWritten(); };
+  const save = async () => { await api(`/api/runs/${R()}/written`, {method: 'PUT', body: {stories: WR.stories}}); markDirty(false); };
+  $('#wrSave').onclick = async () => { try { await save(); toast('已保存'); await refreshOverview(); } catch (e) { toast(e.message, true); } };
+  $('#wrGo').onclick = async () => {
+    const stop = OV.workflow.editReview ? '配完会停下，让你在「配音试听」里听。' : '注意：「视频编辑」的开关没勾，配完会直接渲染' + '，并导出素材包。';
+    if (!confirm(`保存，然后开始配音？只有改过的新闻会重新配音。\n${stop}`)) return;
+    try { await save(); await act('after-write'); } catch (e) { toast(e.message, true); }
+  };
+}
+
+async function loadVoice() { VO = await api(`/api/runs/${R()}/voice`); VO.marks = {}; }
+function renderVoice() {
+  if (!OV.has.voice) return emptyStage(busy() ? '正在配音，完成后可以在这里逐句试听。' : '还没有配音。先在「稿子与配图」里点「保存并开始配音」。');
+  const nMarked = Object.values(VO.marks).reduce((a, s) => a + s.size, 0);
+  $('#main').innerHTML = runningNote() + `
+    ${OV.stale.voice ? `<div class="note warn">稿子在配音之后又改过，下面还是旧的配音。<button class="btn small primary" id="reAll" ${busy() ? 'disabled' : ''}>按新稿子重新配音</button>（只重配改过的新闻）</div>` : ''}
+    <div class="note">点 ▶ 听单句。哪句念得不好就勾「重念」，最后点「重念勾选的句子」——程序会换一种念法再念这几句，其他句子不变。想改字的话回「稿子与配图」改。${VO.provider !== 'qwen3' ? '（现在用的声音每次念出来一样，重念没有效果，建议改字）' : ''}标 ⚠ 的是自动质检觉得不太像或时长异常的句子，重点听。</div>
+    <div class="bar"><b>全片配音 ${mmss(VO.duration)}</b><audio controls preload="none" src="${fileUrl('narration.wav', VO.narrationTime)}" style="height:34px;flex:1;min-width:240px"></audio>
+      <button class="btn" id="revBtn" ${busy() || !nMarked ? 'disabled' : ''}>重念勾选的句子（${nMarked}）</button>
+      <button class="btn primary" id="toStills">听完了，去看画面 →</button></div>
+    ${VO.segments.map(g => `<div class="seg"><div class="flex"><b class="grow">${esc(g.title)}</b><span class="cnt">从 ${mmss(g.start)} 开始 · ${g.sentences.length} 句${g.sentences.some(x => x.warn) ? ' · <span class="warnc">⚠ 有句子要重点听</span>' : ''}</span></div>
+      ${g.audio ? `<audio controls preload="none" data-aud="${g.id}" src="${fileUrl(g.audio, g.audioTime)}"></audio>` : ''}
+      ${g.sentences.map(x => `<div class="vs" id="vs-${g.id}-${x.k}"><button class="btn small" data-play="${g.id}" data-k="${x.k}" title="播放这一句">▶</button>
+        <div>${esc(x.text)} ${x.warn ? `<span class="warnc" title="${esc(x.warn)}">⚠ ${esc(x.warn)}</span>` : ''}${x.retakes ? ` <span class="cnt">（已重念 ${x.retakes} 次）</span>` : ''}</div>
+        <label class="switch"><input type="checkbox" data-mark="${g.id}" data-k="${x.k}" ${VO.marks[g.id]?.has(x.k) ? 'checked' : ''}>重念</label></div>`).join('')}
+    </div>`).join('')}`;
+  const m = $('#main');
+  m.querySelectorAll('[data-play]').forEach(b => b.onclick = () => {
+    const g = VO.segments.find(x => x.id === b.dataset.play), x = g.sentences[+b.dataset.k], a = m.querySelector(`[data-aud="${g.id}"]`);
+    m.querySelectorAll('audio').forEach(o => o !== a && o.pause());
+    m.querySelectorAll('.vs.playing').forEach(o => o.classList.remove('playing')); $(`#vs-${g.id}-${x.k}`).classList.add('playing');
+    a.currentTime = x.t0; a.play(); clearInterval(a._t); a._t = setInterval(() => { if (a.currentTime >= x.t1 + .05 || a.paused) { a.pause(); clearInterval(a._t); } }, 50);
+  });
+  m.querySelectorAll('[data-mark]').forEach(c => c.onchange = () => { const s = VO.marks[c.dataset.mark] ||= new Set(); c.checked ? s.add(+c.dataset.k) : s.delete(+c.dataset.k); renderVoiceBar(); });
+  const renderVoiceBar = () => { const n = Object.values(VO.marks).reduce((a, s) => a + s.size, 0); $('#revBtn').textContent = `重念勾选的句子（${n}）`; $('#revBtn').disabled = busy() || !n; };
+  $('#revBtn').onclick = async () => {
+    const marks = Object.fromEntries(Object.entries(VO.marks).map(([k, s]) => [k, [...s]]).filter(([, l]) => l.length));
+    if (!confirm('重念这些句子？只重新合成它们所在的那几条新闻，通常 1–3 分钟。')) return;
+    try { const j = await api(`/api/runs/${R()}/revoice`, {method: 'POST', body: {marks}}); toast('已开始：' + j.label); VO.marks = {}; $('#logs').open = true; await refreshOverview(); renderStep(); } catch (e) { toast(e.message, true); }
+  };
+  if ($('#reAll')) $('#reAll').onclick = () => act('after-write');
+  $('#toStills').onclick = () => go('stills');
+}
+
+async function loadStills() { STL = await api(`/api/runs/${R()}/stills`); }
+function renderStills() {
+  if (!OV.has.voice) return emptyStage('先完成配音，才能预览画面。');
+  $('#main').innerHTML = runningNote() + `
+    <div class="note">渲染整段视频之前，先抽几张关键画面看看：每条新闻的开头、每张配图出现时。觉得没问题就点「渲染视频」（几分钟）。画面有问题回「稿子与配图」改。</div>
+    ${OV.stale.voice ? '<div class="note warn">稿子改过还没重新配音，先去「配音试听」重新配音。</div>' : ''}
+    ${STL.stale ? '<div class="note warn">配音之后改过东西，这些截图是旧的，建议重新生成。</div>' : ''}
+    <div class="bar"><button class="btn" id="stBtn" ${busy() ? 'disabled' : ''}>${STL.frames.length ? '重新生成画面预览' : '生成画面预览'}（约 1 分钟）</button><span class="grow"></span>
+      <button class="btn primary" id="renderBtn" ${busy() || OV.stale.voice ? 'disabled' : ''}>画面没问题，渲染视频 →</button></div>
+    ${STL.cover ? `<h3>封面</h3><img class="cover zoomable" style="max-width:480px" src="${fileUrl('cover.jpg', STL.coverTime)}">` : ''}
+    <h3 style="margin-top:12px">关键画面（${STL.frames.length} 张，点图放大）</h3>
+    <div class="frames">${STL.frames.map(f => `<figure><img src="${fileUrl(f.src, STL.time)}" loading="lazy"><figcaption>${mmss(f.t)} · ${esc(f.title)}</figcaption></figure>`).join('') || '<div class="cnt">还没有生成。</div>'}</div>`;
+  $('#stBtn').onclick = () => act('stills');
+  $('#renderBtn').onclick = () => { const stop = '渲染完会自动导出素材包，在「导出」里查看。'; if (confirm('开始渲染整段视频？大约几分钟。\n' + stop)) act('after-voice'); };
+}
+
+// ========== 模块三：导出 ==========
+// 本项目不含任何投稿代码：这里只编辑标题、简介、标签，导出素材包，由你自己去各平台手动上传（方法见 docs/publishing-guide.md）
+async function loadPublish() { PUB = OV.has.publish ? await api(`/api/runs/${R()}/publish`) : null; if (PUB?.current) PUB.form = {title: PUB.current.title, desc: PUB.current.desc, tags: [...PUB.current.tags]}; }
+function renderPublish() {
+  if (!OV.has.video || !PUB?.current) return emptyStage(busy() ? '正在生成视频，做完这里可以看成片。' : '还没有成片。先在「视频编辑 → 画面预览」里点「渲染视频」。');
+  const f = PUB.form, v = fileUrl(OV.video, OV.videoTime);
+  $('#main').innerHTML = runningNote() + `
+    ${OV.stale.video ? '<div class="note warn">配音或稿子在视频生成之后又改过，现在的视频里还是旧内容。要更新，请回「画面预览」重新渲染。</div>' : ''}
+    <div class="note">${OV.package ? '素材包已导出：<code>' + esc(OV.package) + '</code>（视频、横竖封面、标题、简介、标签、分段章节）。改了下面的文字后点「保存并重新导出」。' : '还没有导出素材包。'}</div>
+    <div class="cols">
+      <div>
+        <h3>成片</h3><video controls preload="metadata" src="${v}"></video>
+        <h3 style="margin-top:12px">封面</h3><img class="cover zoomable" src="${fileUrl('cover.jpg', OV.coverTime)}">
+        <div class="cnt">封面上的字是前几条新闻的「封面标语」，在「稿子与配图」里改。</div>
+      </div>
+      <div>
+        <div class="field"><label>标题 ${count(f.title.length, 80)}</label><input type="text" id="pTitle" value="${esc(f.title)}"></div>
+        <div class="field"><label>简介 ${count(f.desc.length, 2000)}（时间轴是按当前视频自动算的）</label><textarea id="pDesc" rows="12">${esc(f.desc)}</textarea></div>
+        <div class="field"><label>标签（${f.tags.length}/10，每个 ≤20 字）</label>
+          <div class="flex"><input type="text" id="pTagIn" class="grow" placeholder="输入标签后按回车"><button class="btn small" id="pTagAdd">添加</button></div>
+          <div class="tags">${f.tags.map((t, k) => `<span class="tag">${esc(t)}<button data-tdel="${k}">×</button></span>`).join('')}</div></div>
+        <div class="bar"><button class="btn" id="pSave">保存</button><button class="btn" id="pReset" ${PUB.edit ? '' : 'disabled'}>恢复自动生成的版本</button><span class="grow"></span>
+          <button class="btn primary" id="pExport" ${busy() ? 'disabled' : ''}>保存并重新导出</button></div>
+        <div class="cnt">各平台标题长度不同，导出时会按平台自动缩短，写在素材包的 metadata.txt 里。</div>
+      </div>
+    </div>`;
+  const read = () => { f.title = $('#pTitle').value; f.desc = $('#pDesc').value; };
+  for (const id of ['#pTitle', '#pDesc']) { $(id).oninput = () => { read(); markDirty(); }; $(id).onchange = () => renderPublish(); }
+  const addTag = () => { const t = $('#pTagIn').value.trim(); if (!t) return; if (f.tags.length >= 10) return toast('最多 10 个标签，先删一个', true); if (!f.tags.includes(t)) f.tags.push(t); markDirty(); renderPublish(); };
+  $('#pTagAdd').onclick = addTag; $('#pTagIn').onkeydown = e => { if (e.key === 'Enter') addTag(); };
+  $('#main').querySelectorAll('[data-tdel]').forEach(el => el.onclick = () => { f.tags.splice(+el.dataset.tdel, 1); markDirty(); renderPublish(); });
+  const save = async () => { read(); await api(`/api/runs/${R()}/publish`, {method: 'PUT', body: f}); markDirty(false); };
+  $('#pSave').onclick = async () => { try { await save(); toast('已保存'); await loadPublish(); renderPublish(); } catch (e) { toast(e.message, true); } };
+  $('#pReset').onclick = async () => { if (!confirm('丢掉你改过的标题、简介和标签，换回自动生成的版本？')) return; await api(`/api/runs/${R()}/publish`, {method: 'PUT', body: {reset: true}}); markDirty(false); await loadPublish(); renderPublish(); toast('已恢复'); };
+  $('#pExport').onclick = async () => { try { await save(); await act('export'); } catch (e) { toast(e.message, true); } };
+}
+
+// ---------- 通用 ----------
+const STEPS = {
+  collect: [() => OV.has.report && !COL, loadCollect, renderCollect],
+  select: [() => OV.has.selected && !SEL, loadSelection, renderSelection],
+  write: [() => OV.has.written && !WR, loadWritten, renderWritten],
+  voice: [() => OV.has.voice && !VO, loadVoice, renderVoice],
+  stills: [() => OV.has.voice && !STL, loadStills, renderStills],
+  publish: [() => OV.has.publish && !PUB, loadPublish, renderPublish],
+};
+async function renderStep() {
+  if (!OV) return;
+  const [needLoad, load, render] = STEPS[STEP] || STEPS.select;
+  try { if (needLoad()) await load(); render(); } catch (e) { emptyStage('读取失败：' + esc(e.message)); }
+}
+function resetData() { COL = SEL = WR = VO = STL = PUB = null; CUR = 0; markDirty(false); }
+$('#runSel').onchange = async e => {
+  if (DIRTY && !confirm('有改动还没保存，确定换一期吗？')) { e.target.value = RUN; return; }
+  RUN = e.target.value; resetData(); await refreshOverview(); STEP = STAGE_STEP[OV.status.stage] || STEP; renderModules(); renderStep();
+};
+
+// 开始新的一期：选来源
+let SOURCES = null, COLUMNS = [];
+$('#newBtn').onclick = async () => {
+  try { if (!SOURCES) ({sources: SOURCES, columns: COLUMNS} = await api('/api/sources')); } catch (e) { return toast(e.message, true); }
+  const kinds = {official: '官方', media: '媒体', aggregator: '聚合', community: '社区', trending: '热榜'};
+  $('#srcGrid').innerHTML = SOURCES.map(s => `<label title="${esc(s.id)}"><input type="checkbox" data-sid="${esc(s.id)}" ${s.enabled ? 'checked' : ''}>${esc(s.name)} <span class="cnt">${kinds[s.kind] || s.kind}</span></label>`).join('');
+  // 板块：选了板块，名字和要勾的来源跟着变
+  $('#newCol').innerHTML = COLUMNS.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+  $('#newCol').onchange = () => {
+    const c = COLUMNS.find(x => x.id === $('#newCol').value); if (!c) return;
+    $('#newName').value = $('#newBtn').dataset.today + (c.runSuffix ? '-' + c.runSuffix : '');
+    document.querySelectorAll('[data-sid]').forEach(el => { const s = SOURCES.find(x => x.id === el.dataset.sid); el.checked = s.enabled && (!c.sources || c.sources.includes(s.id)); });
+  };
+  $('#newCol').onchange();
+  const wf = OV?.workflow || {collectReview: true};
+  $('#newNote').textContent = '采集大约 3–5 分钟，然后 AI 先选一版（约 5 分钟）。' + (wf.collectReview ? '选完会停下，等你在「选题审核」里确认。' : '注意：「信息采集」的开关没勾，选完会直接往下做。');
+  $('#newDlg').showModal();
+};
+document.querySelectorAll('[data-sel]').forEach(b => b.onclick = () => {
+  const mode = b.dataset.sel;
+  document.querySelectorAll('[data-sid]').forEach(c => { const s = SOURCES.find(x => x.id === c.dataset.sid); c.checked = mode === 'all' || (mode === 'official' && s.kind === 'official') || (mode === 'zh' && s.lang === 'zh'); });
+});
+$('#newCancel').onclick = () => $('#newDlg').close();
+$('#newGo').onclick = async () => {
+  const name = $('#newName').value.trim(), column = $('#newCol').value, sources = [...document.querySelectorAll('[data-sid]:checked')].map(c => c.dataset.sid);
+  try {
+    await api('/api/runs', {method: 'POST', body: {name, column, sources}}); $('#newDlg').close();
+    await loadRuns(name); resetData(); await refreshOverview(); STEP = 'collect'; renderModules(); renderStep(); $('#logs').open = true; toast('已开始采集');
+  } catch (e) { toast(e.message, true); }
+};
+
+async function tick() {
+  try {
+    const finished = await refreshOverview();
+    if (finished) {
+      toast('后台任务结束：' + (OV.status.message || ''));
+      if (!DIRTY) { resetData(); await loadRuns(RUN); const s = STAGE_STEP[OV.status.stage]; if (s && /^review-|done|error/.test(OV.status.stage)) STEP = s; renderModules(); renderStep(); }
+    }
+  } catch {}
+  setTimeout(tick, busy() ? 3000 : 10000);
+}
+(async () => {
+  try { await loadRuns(); await refreshOverview(); if (OV && !localStorage.getItem('wb-step')) STEP = STAGE_STEP[OV.status.stage] || 'select'; renderModules(); await renderStep(); }
+  catch (e) { emptyStage('连不上工作台：' + esc(e.message)); }
+  setTimeout(tick, 3000);
+})();
+</script>
+</body>
+</html>

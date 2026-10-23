@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>AI Daily Portrait</title>
+<script src="icons.js"></script>
+<style>
+  /* 竖屏 1080×1920 模板（V1 播报台）。数据由 portrait.mjs 准备，renderAt(t) 逐帧画。 */
+  :root{
+    --blue:#1F6BFF; --deep:#0B2A7A; --sky:#5AB4FF; --ice:#EAF2FF; --yel:#FFD23F; --red:#E2262C;
+    --ink:#0B1630; --ink2:#34405C; --muted:#7C8AA6; --line:#DCE6F8;
+    --font:"HarmonyOS Sans SC","MiSans","Source Han Sans SC","Noto Sans SC","Microsoft YaHei UI","Microsoft YaHei",sans-serif;
+    --num:"Bahnschrift","DIN Alternate",var(--font);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:1080px;height:1920px;overflow:hidden;background:#F4F8FF;font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased}
+  #stage{position:absolute;inset:0;overflow:hidden;
+    background:radial-gradient(800px 600px at 100% 0%,#D6E6FF 0%,rgba(214,230,255,0) 70%),radial-gradient(900px 700px at 0% 100%,#DCEBFF 0%,rgba(220,235,255,0) 70%),#F4F8FF}
+  #dots{position:absolute;inset:0;background-image:radial-gradient(rgba(31,107,255,.12) 1.5px,transparent 1.6px);background-size:34px 34px}
+  #ai{position:absolute;right:40px;top:18px;font-size:20px;color:var(--muted);letter-spacing:1px;z-index:5}
+  /* 顶栏 */
+  #hd{position:absolute;left:40px;right:40px;top:46px;height:104px;display:flex;align-items:center;gap:20px}
+  #av{width:100px;height:100px;border-radius:50%;border:5px solid var(--blue);background:#fff center 22%/170% no-repeat;flex:none}
+  #nm{font-size:48px;font-weight:900;letter-spacing:1px}
+  #nm2{font-size:25px;color:var(--muted);margin-top:2px}
+  #no{margin-left:auto;background:var(--deep);color:#fff;border-radius:40px;padding:10px 26px;font-size:32px;font-weight:800;font-family:var(--num);display:flex;gap:10px;align-items:center}
+  #no b{color:var(--yel)}
+  /* 章节条：开场 / 每条新闻 / 结尾，当前这段高亮（放顶部，避开手机底部和右侧按钮） */
+  #chap{position:absolute;left:40px;right:40px;top:164px;height:48px;display:flex;gap:6px}
+  .cs{flex:1;min-width:0;position:relative;border-radius:12px;background:#E3ECFB;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .cs.io{flex:.62}
+  .cs u{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,255,255,.28)}
+  .cs span{position:relative;font-size:22px;font-weight:700;color:#8593AE;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 8px}
+  .cs.done{background:#C9D9F8}.cs.done span{color:#4C5D80}
+  .cs.on{background:linear-gradient(90deg,var(--deep),var(--blue));box-shadow:0 6px 14px rgba(31,107,255,.3)}
+  .cs.on span{color:#fff;font-weight:900}
+  /* 场景 */
+  #scene{position:absolute;left:0;top:0;width:1080px;height:1920px}
+  #wipe{position:absolute;left:0;top:200px;width:1080px;height:1000px;background:linear-gradient(90deg,var(--deep),var(--blue));z-index:6;transform:translateX(1100px)}
+  .ribbon{position:absolute;left:30px;top:238px;max-width:1020px;transform-origin:20% 50%;display:flex;align-items:center;gap:22px;background:linear-gradient(90deg,var(--deep),var(--blue));color:#fff;padding:20px 40px 22px 24px;border-radius:24px;box-shadow:0 14px 30px rgba(11,42,122,.3),inset 0 -6px 0 rgba(0,0,0,.15)}
+  .ribbon .lg{width:100px;height:100px;border-radius:22px;background:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+  .ribbon .lg img{width:68px;height:68px}
+  .ribbon .lg svg{width:60px;height:60px}
+  .ribbon .t{font-size:62px;font-weight:900;letter-spacing:1px;line-height:1.12;white-space:nowrap}
+  .ribbon .t small{display:block;font-size:30px;font-weight:700;opacity:.88;margin-top:6px;letter-spacing:2px}
+  .screen{position:absolute;left:36px;right:36px;top:446px;height:700px;background:#fff;border-radius:36px;border:3px solid #E1EBFC;box-shadow:0 24px 60px rgba(11,42,122,.12);padding:34px 40px;overflow:hidden}
+  .hero{display:flex;align-items:flex-end;gap:24px;height:170px}
+  .hero .v{font-size:170px;font-weight:900;font-family:var(--num);line-height:.86;color:var(--blue);letter-spacing:-4px;white-space:nowrap}
+  .hero .v.w{font-family:var(--font);letter-spacing:2px}
+  .hero .k{font-size:44px;font-weight:900;padding-bottom:12px;white-space:nowrap}
+  .hero .k small{display:block;font-size:27px;color:var(--muted);font-weight:600;margin-top:8px;white-space:normal}
+  /* 要点卡片网格：每张一个图标 + 小标题 + 一两行要点，各有底色和纹理；配音讲到哪张，哪张变成实心蓝 */
+  .grid{position:absolute;left:30px;right:30px;top:226px;bottom:62px;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:14px}
+  .grid.one{grid-template-columns:1fr}
+  .gc{position:relative;border-radius:22px;padding:16px 20px 14px;overflow:hidden;border:2px solid transparent;min-height:0}
+  .gc.wide{grid-column:1 / span 2}
+  .gc:before{content:"";position:absolute;inset:0;opacity:.55;pointer-events:none}
+  .gc.p0:before{background-image:radial-gradient(currentColor 1.4px,transparent 1.6px);background-size:16px 16px}
+  .gc.p1:before{background-image:linear-gradient(currentColor 1px,transparent 1px),linear-gradient(90deg,currentColor 1px,transparent 1px);background-size:22px 22px}
+  .gc.p2:before{background-image:repeating-linear-gradient(135deg,currentColor 0 1.5px,transparent 1.5px 12px)}
+  .gc.p3:before{background-image:radial-gradient(circle at 0 0,transparent 9px,currentColor 9.5px,transparent 11px);background-size:20px 20px}
+  .gc .hd{position:relative;display:flex;align-items:center;gap:12px}
+  .gc .ic{width:46px;height:46px;border-radius:13px;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;flex:none}
+  .gc .ic svg{width:28px;height:28px}
+  .gc .h{font-size:32px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gc .b{position:relative;font-size:26px;line-height:1.42;color:var(--ink2);margin-top:8px;font-weight:500}
+  .gc.on{background:linear-gradient(135deg,var(--blue),var(--deep)) !important;border-color:var(--deep) !important;box-shadow:0 12px 26px rgba(31,107,255,.35)}
+  .gc.on:before{color:rgba(255,255,255,.14) !important}
+  .gc.on .h,.gc.on .b{color:#fff !important}
+  .gc.on .ic{background:rgba(255,255,255,.95)}
+  .pdots{position:absolute;left:40px;bottom:24px;display:flex;gap:10px}
+  .pdots i{width:14px;height:14px;border-radius:7px;background:#D5E1F7}
+  .pdots i.on{width:40px;background:var(--blue)}
+  .srcl{position:absolute;right:40px;bottom:18px;font-size:24px;color:var(--muted)}
+  /* 配图、推文盖在屏幕上 */
+  .mlayer{position:absolute;left:36px;right:36px;top:446px;height:700px;z-index:4;pointer-events:none}
+  .media{position:absolute;inset:0;opacity:0;background:#fff;border-radius:36px;border:3px solid #E1EBFC;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px}
+  .media .imgbox{border-radius:18px;overflow:hidden;background:#F2F5FA;box-shadow:0 10px 30px rgba(11,42,122,.15)}
+  .media img{display:block;width:100%;height:100%;object-fit:contain}
+  .media .cap{margin-top:20px;font-size:24px;color:var(--muted);max-width:940px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .media.tweet{align-items:stretch;justify-content:flex-start;padding:44px 50px}
+  .tw-head{display:flex;align-items:center;gap:18px;margin-bottom:26px}
+  .tw-head .twav{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#3C7BFF,#1C4FD6);color:#fff;font-size:36px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+  .tw-head .nm{font-size:34px;font-weight:800;display:flex;align-items:center;gap:8px;white-space:nowrap}
+  .tw-head .nm svg{width:30px;height:30px}
+  .tw-head .hdl{font-size:26px;color:var(--muted);margin-top:2px}
+  .tw-head .xl{margin-left:auto;font-size:48px;font-weight:900;font-family:Arial,sans-serif}
+  .tw-zh{font-size:42px;line-height:1.55;font-weight:600;letter-spacing:.5px}
+  .tw-foot{margin-top:auto;font-size:24px;color:#98A5BC}
+  /* 字幕 */
+  /* 字幕条：深蓝圆角条、白字，数字标黄 */
+  #subw{position:absolute;left:30px;right:30px;top:1168px;display:flex;justify-content:center;z-index:7}
+  #sub{max-width:1020px;background:rgba(11,26,77,.9);color:#fff;border-radius:22px;padding:12px 30px 14px;text-align:center;font-size:48px;font-weight:800;line-height:1.3;letter-spacing:1px;box-shadow:0 10px 24px rgba(11,26,77,.25)}
+  .hl{color:var(--yel)}
+  /* 主持人 */
+  #disc{position:absolute;left:20px;top:1776px;width:460px;height:64px;border-radius:50%;background:radial-gradient(closest-side,rgba(31,107,255,.28),rgba(31,107,255,0))}
+  #host{position:absolute;left:30px;top:1338px;width:440px;height:476px;z-index:3;transform-origin:50% 100%}
+  #host img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;object-position:50% 100%;opacity:0}
+  #host img.on{opacity:1}
+  #emote{position:absolute;left:370px;top:1350px;z-index:5;background:#fff;border:4px solid var(--ink);border-radius:26px;font-size:48px;font-weight:900;padding:0 18px;line-height:1.2;box-shadow:4px 4px 0 var(--ink);opacity:0;transform-origin:30% 100%}
+  #bub{position:absolute;left:494px;width:420px;top:1452px;background:#fff;border-radius:28px;padding:24px 30px 28px;border:3px solid var(--deep);box-shadow:8px 8px 0 var(--deep);z-index:5;opacity:0;transform-origin:0 50%}
+  #bub:before{content:"";position:absolute;left:-36px;top:58px;border:16px solid transparent;border-right:20px solid var(--deep)}
+  #bub .who{font-size:25px;font-weight:800;color:var(--blue);letter-spacing:2px}
+  #bub .say{margin-top:8px;font-size:42px;font-weight:900;line-height:1.36}
+  /* 底部：下一条预告（可能被平台文字挡住，只放不要紧的内容） */
+  #next{position:absolute;left:40px;right:40px;top:1812px;height:76px;border-radius:38px;background:rgba(255,255,255,.75);border:2px solid var(--line);display:flex;align-items:center;gap:16px;padding:0 28px;font-size:28px;color:var(--ink2);z-index:2}
+  #next b{flex:none;background:var(--blue);color:#fff;border-radius:20px;padding:4px 16px;font-size:24px;font-weight:800}
+  #next span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* 开场概览、结尾 */
+  .ovh{font-size:46px;font-weight:900;color:var(--deep);margin-bottom:24px;display:flex;align-items:center;gap:14px}
+  .ovh small{font-size:26px;color:var(--muted);font-weight:600;margin-left:auto}
+  .ovi{display:flex;align-items:center;gap:20px;padding:18px 6px;border-top:2px dashed #E1EBFC}
+  .ovi .n{width:58px;height:58px;border-radius:16px;background:var(--ice);color:var(--blue);font-family:var(--num);font-size:34px;font-weight:900;display:flex;align-items:center;justify-content:center;flex:none}
+  .ovi .lg{width:58px;height:58px;flex:none;display:flex;align-items:center;justify-content:center}
+  .ovi .lg img{width:50px;height:50px}
+  .ovi .t{font-size:36px;font-weight:800;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .outro{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .outro .big{font-size:72px;font-weight:900;color:var(--deep);letter-spacing:3px}
+  .outro .small{margin-top:24px;font-size:36px;color:var(--ink2);letter-spacing:2px}
+  .outro .chip2{margin-top:44px;padding:16px 34px;border-radius:40px;background:var(--blue);color:#fff;font-size:34px;font-weight:800;box-shadow:0 10px 24px rgba(31,107,255,.3)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="dots"></div>
+  <div id="ai">本视频含 AI 生成内容</div>
+  <div id="hd"><div id="av"></div><div><div id="nm"></div><div id="nm2"></div></div><div id="no"></div></div>
+  <div id="chap"></div>
+  <div id="scene"></div>
+  <div id="subw"><div id="sub"></div></div>
+  <div id="disc"></div>
+  <div id="host"></div>
+  <div id="emote"></div>
+  <div id="bub"><div class="who"></div><div class="say"></div></div>
+  <div id="next"><b>下一条</b><span></span></div>
+  <div id="wipe"></div>
+</div>
+<script>
+'use strict';
+let D = null, SEGS = [], cur = -1, R = null, HOSTIMG = {}, progEls = [];
+const $ = (s, r=document) => r.querySelector(s);
+const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
+const easeOut = x => 1 - Math.pow(1 - clamp(x,0,1), 3);
+const easeInOut = x => { x = clamp(x,0,1); return x < .5 ? 4*x*x*x : 1 - Math.pow(-2*x+2, 3)/2; };
+const backOut = x => { x = clamp(x,0,1); const c = 1.9; return 1 + (c+1)*Math.pow(x-1,3) + c*Math.pow(x-1,2); };
+const r3 = v => Math.round(v*1000)/1000, r1 = v => Math.round(v*10)/10;
+let SIG = [];
+// 卡片配色：[文字/图标色, 底色, 纹理和边框色]
+const CARD_COLORS = [['#1F6BFF','#EEF4FF','#C9DBFB'],['#0E9F8E','#E9F8F5','#BFE7DF'],['#E07B12','#FFF4E6','#F5D6AE'],['#6A4FE0','#F2EFFF','#D6CCF7'],['#D6336C','#FFEFF4','#F6C7D6'],['#2B8A3E','#EDF8EF','#C3E5CA']];
+function css(el, prop, val){ if(el.__s === undefined) el.__s = {}; if(el.__s[prop] !== val){ el.style[prop] = val; el.__s[prop] = val; } SIG.push(val); }
+function icon(name, color){ const inner = (window.ICONS && (ICONS[name] || ICONS['sparkles'])) || ''; return `<svg viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`; }
+function esc(s){ return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+// 字幕里的数字（3倍、70%、1元、209M、100万…）自动加黄色马克笔
+// 「M3.1」「GPT-5」这种型号里的数字不标
+function markNums(s){ return esc(s).replace(/(?<![A-Za-z0-9.\-])([0-9][0-9.,]*\s*(?:%|倍|元|万|亿|EB|GPU|小时|个|家|款|[KMBT](?![A-Za-z]))?)(?![A-Za-z0-9])/g, '<span class="hl">$1</span>'); }
+function fitOneLine(el, maxPx, minPx, maxWidth){
+  let size = maxPx; el.style.fontSize = size + 'px';
+  while (el.scrollWidth > maxWidth && size > minPx){ size -= 2; el.style.fontSize = size + 'px'; }
+  return size;
+}
+function fitBox(el, inner, maxPx, minPx, maxH){
+  let size = maxPx; inner.forEach(e => e.style.fontSize = size + 'px');
+  while (el.scrollHeight > maxH && size > minPx){ size -= 2; inner.forEach(e => e.style.fontSize = size + 'px'); }
+}
+
+window.__init = async function(data){
+  D = data; SEGS = data.segments;
+  $('#nm').textContent = data.channel.name;
+  $('#nm2').textContent = `${data.dateLabel} · ${data.host.name}播报`;
+  $('#av').style.backgroundImage = `url("${data.host.avatar}")`;
+  $('#bub .who').textContent = `${data.host.name}点评`;
+  // 每个姿势一张图；嘴型/眨眼用同姿势的变体图（idle-0 闭嘴、idle-1 半张、idle-2 张开、idle-b 眨眼）
+  const host = $('#host');
+  for (const [k, src] of Object.entries(data.host.images)){ const im = document.createElement('img'); im.src = src; host.appendChild(im); HOSTIMG[k] = im; }
+  const chap = $('#chap');
+  SEGS.forEach(s => { const e = document.createElement('div'); e.className = 'cs' + (s.type === 'item' ? '' : ' io'); e.innerHTML = `<u></u><span>${esc(s.tab || (s.type === 'intro' ? '开场' : s.type === 'outro' ? '结尾' : s.short))}</span>`; chap.appendChild(e); progEls.push(e); });
+  const srcs = [...new Set(SEGS.flatMap(s => (s.media || []).filter(m => m.src).map(m => m.src)))];
+  window.__imgSize = {};
+  await Promise.all([...srcs.map(src => new Promise(res => { const im = new Image(); im.onload = async () => { try { await im.decode(); } catch(e){} window.__imgSize[src] = [im.naturalWidth, im.naturalHeight]; res(); }; im.onerror = () => { window.__imgSize[src] = null; res(); }; im.src = src; })),
+    ...Object.values(HOSTIMG).map(im => im.decode().catch(() => {}))]);
+  await document.fonts.ready;
+  return {ok:true, images: Object.keys(window.__imgSize).length, broken: Object.values(window.__imgSize).filter(v => !v).length, host: Object.keys(HOSTIMG).length};
+};
+
+function ribbon(seg){
+  const lg = seg.logo ? `<img src="${seg.logo}">` : icon(seg.icon || 'sparkles', '#1F6BFF');
+  return `<div class="ribbon"><div class="lg">${lg}</div><div class="t"><span class="tt">${esc(seg.ribbon || seg.short || seg.title)}</span><small>${esc(seg.ribbonSub || '')}</small></div></div>`;
+}
+
+function buildItem(seg){
+  const sc = $('#scene'); const x = seg.extra || {};
+  const hero = x.hero || {v: '', k: seg.title};
+  const isWord = !/^[-−+]?[0-9]/.test(hero.v || '');
+  const cards = (seg.cards || []).slice(0, 6);
+  // 1～3 张一列；4 张 2×2；5 张最后一张占满一行；6 张 2×3
+  const oneCol = cards.length <= 3;
+  sc.innerHTML = ribbon(seg) + `<div class="screen">
+    <div class="hero">${hero.v ? `<div class="v${isWord ? ' w' : ''}">${esc(hero.v)}</div>` : ''}<div class="k">${esc(hero.k)}<small>${esc(hero.small || '')}</small></div></div>
+    <div class="grid${oneCol ? ' one' : ''}">${cards.map((c, k) => { const col = CARD_COLORS[k % CARD_COLORS.length]; const wide = !oneCol && cards.length % 2 === 1 && k === cards.length - 1; return `<div class="gc p${k % 4}${wide ? ' wide' : ''}" style="background:${col[1]};border-color:${col[2]};color:${col[2]}"><div class="hd"><div class="ic">${icon(c.icon, col[0])}</div><div class="h" style="color:${col[0]}">${esc(c.heading)}</div></div><div class="b">${esc(c.body)}</div></div>`; }).join('')}</div>
+    <div class="pdots">${cards.map(() => '<i></i>').join('')}</div>
+    <div class="srcl">${esc(seg.sourceLine || '')}</div>
+  </div><div class="mlayer"></div>`;
+  const rb = sc.querySelector('.ribbon'); fitOneLine(rb.querySelector('.tt'), 62, 40, 860);
+  const hv = sc.querySelector('.hero .v'); if (hv) fitOneLine(hv, isWord ? 130 : 170, 80, 540);
+  const hk = sc.querySelector('.hero .k'); fitOneLine(hk, 44, 30, 940 - (hv ? hv.offsetWidth + 24 : 0));
+  const gcs = [...sc.querySelectorAll('.gc')];
+  // 字放不下就缩小（最小 21 像素）
+  // 5～6 张卡片时大数字缩小，给卡片多留地方
+  if (cards.length >= 5){ const scr = sc.querySelector('.screen'); scr.querySelector('.hero').style.height = '128px'; if (hv) hv.style.fontSize = Math.min(parseFloat(hv.style.fontSize), 128) + 'px'; scr.querySelector('.grid').style.top = '176px'; }
+  gcs.forEach(g => {
+    const b = g.querySelector('.b'); let fs = oneCol ? 30 : 26; b.style.fontSize = fs + 'px';
+    while (g.scrollHeight > g.clientHeight + 1 && fs > 22){ fs -= 1; b.style.fontSize = fs + 'px'; }
+    // 还是放不下：按剩余高度限制行数，末尾显示省略号，不让字被切成半行
+    if (g.scrollHeight > g.clientHeight + 1){ const lh = fs * 1.42; const room = g.clientHeight - b.offsetTop - 4; b.style.display = '-webkit-box'; b.style.webkitBoxOrient = 'vertical'; b.style.overflow = 'hidden'; b.style.webkitLineClamp = String(Math.max(1, Math.floor(room / lh))); }
+    fitOneLine(g.querySelector('.h'), oneCol ? 34 : 30, 22, g.clientWidth - 100);
+  });
+  // 配图、推文
+  const ml = sc.querySelector('.mlayer'); const media = [];
+  for (const m of (seg.media || [])){
+    if (m.type === 'tweet'){
+      const el = document.createElement('div'); el.className = 'media tweet';
+      const ini = esc((m.name || m.handle || 'X').replace(/^[^\p{L}\p{N}]+/u, '').slice(0, 1).toUpperCase());
+      el.innerHTML = `<div class="tw-head"><div class="twav">${ini}</div><div><div class="nm">${esc(m.name)}${icon('circle-check', '#1F6BFF')}</div><div class="hdl">@${esc(m.handle)}</div></div><div class="xl">X</div></div><div class="tw-zh">${esc(m.textZh)}</div><div class="tw-foot">${esc(m.date || '')}${m.date ? ' · ' : ''}中文为 AI 翻译</div>`;
+      ml.appendChild(el);
+      const zh = el.querySelector('.tw-zh'); fitBox(el, [zh], 42, 28, 700);
+      media.push({el, img: null, m}); continue;
+    }
+    const sz = window.__imgSize[m.src]; if (!sz) continue;
+    const s2 = Math.min(940 / sz[0], 560 / sz[1], 2.4); const w = Math.round(sz[0]*s2), h = Math.round(sz[1]*s2);
+    const el = document.createElement('div'); el.className = 'media';
+    el.innerHTML = `<div class="imgbox" style="width:${w}px;height:${h}px"><img src="${esc(m.src)}"></div>` + (m.caption ? `<div class="cap">${esc(m.caption)}</div>` : '');
+    ml.appendChild(el); media.push({el, img: el.querySelector('img'), m});
+  }
+  return {rb, screen: sc.querySelector('.screen'), hero: sc.querySelector('.hero'), hv, gcs, dots: [...sc.querySelectorAll('.pdots i')], media};
+}
+
+function buildIntro(seg){
+  const sc = $('#scene');
+  sc.innerHTML = ribbon({ribbon: seg.title, ribbonSub: seg.subtitle, icon: 'list-checks'}) + `<div class="screen"><div class="ovh">${esc(seg.ovHead || '今日要闻')}<small>${esc(seg.subtitle || '')}</small></div>${(seg.list || []).map((it, k) => `<div class="ovi"><div class="n">${k+1}</div>${it.logo ? `<div class="lg"><img src="${it.logo}"></div>` : ''}<div class="t">${esc(it.title)}</div></div>`).join('')}</div>`;
+  const rb = sc.querySelector('.ribbon'); fitOneLine(rb.querySelector('.tt'), 62, 40, 860);
+  const rows = [...sc.querySelectorAll('.ovi')];
+  rows.forEach(r => { const t = r.querySelector('.t'); fitOneLine(t, 36, 26, 940 - (r.querySelector('.lg') ? 156 : 78)); });
+  return {rb, screen: sc.querySelector('.screen'), rows};
+}
+
+function buildOutro(seg){
+  const sc = $('#scene');
+  sc.innerHTML = `<div class="screen"><div class="outro"><div class="big">${esc(seg.title)}</div><div class="small">${esc(seg.subtitle || '')}</div><div class="chip2">${esc(seg.chip || '')}</div></div></div>`;
+  return {screen: sc.querySelector('.screen'), box: sc.querySelector('.outro')};
+}
+
+function segIndexAt(t){
+  let lo = 0, hi = SEGS.length - 1;
+  while (lo < hi){ const mid = (lo + hi + 1) >> 1; if (SEGS[mid].start <= t) lo = mid; else hi = mid - 1; }
+  return lo;
+}
+
+// 嘴型：mouth[] 是每 1/fps 秒的音量等级（0 闭嘴、1 半张、2 张开）
+function mouthAt(t){ const a = D.mouth; if (!a) return 0; const k = Math.floor(t * D.mouthFps); return a[k] || 0; }
+// 眨眼：每 3～5 秒眨一次（确定性，不用随机数）
+function blinkAt(t){ const period = 3.7, ph = (t + 1.3) % period; return ph < .12; }
+
+window.renderAt = function(t){
+  SIG = [];
+  const i = segIndexAt(t); const seg = SEGS[i];
+  if (i !== cur){
+    R = seg.type === 'intro' ? buildIntro(seg) : seg.type === 'outro' ? buildOutro(seg) : buildItem(seg);
+    $('#no').innerHTML = seg.type === 'item' ? `NO.<b>${String(seg.no).padStart(2,'0')}</b>/${String(D.itemCount).padStart(2,'0')}` : seg.type === 'intro' ? `共 <b>${D.itemCount}</b> 条` : '完';
+    const nx = SEGS.slice(i + 1).find(s => s.type === 'item');
+    $('#next span').textContent = nx ? nx.title : (seg.type === 'outro' ? '每天更新，记得关注' : '最后一条');
+    $('#next b').textContent = nx ? '下一条' : '明天见';
+    $('#bub .say').innerHTML = esc(seg.comment || '').replace(/\n/g, '<br>');
+    cur = i;
+  }
+  SIG.push(i);
+  const ts = t - seg.start, dur = seg.end - seg.start, tl = seg.end - t;
+  // 换条：蓝色色块从右往左扫过
+  const wp = ts < .45 && i > 0 ? easeInOut(ts / .45) : 1;
+  css($('#wipe'), 'transform', `translateX(${Math.round(1100 - 2300 * wp)}px)`);
+  // 飘带：斜着弹进来
+  if (R.rb){ const a = backOut((ts - .15) / .5); css(R.rb, 'transform', `rotate(-2.5deg) translateX(${r1((1-a)*-700)}px)`); css(R.rb, 'opacity', String(r3(clamp((ts-.15)/.15,0,1)))); }
+  const sIn = easeOut((ts - .25) / .45);
+  css(R.screen, 'opacity', String(r3(sIn))); css(R.screen, 'transform', `translateY(${r1((1-sIn)*40)}px)`);
+  const fadeOut = i === SEGS.length - 1 ? 1 : clamp(tl / .25, 0, 1);
+  css($('#scene'), 'opacity', String(r3(fadeOut)));
+  if (seg.type === 'item'){
+    // 大数字：从 0 滚上去
+    if (R.hv && seg.extra?.hero?.v){
+      const raw = seg.extra.hero.v; const m = raw.match(/^([-−+]?)([0-9]+(?:\.[0-9]+)?)(.*)$/);
+      if (m){ const p = easeOut((ts - .45) / .9); const n = parseFloat(m[2]) * p; const dec = (m[2].split('.')[1] || '').length; const txt = m[1] + n.toFixed(dec) + m[3]; if (R.hv.textContent !== txt) R.hv.textContent = txt; SIG.push(txt); }
+    }
+    // 卡片依次弹出；配音讲到哪张，哪张变实心蓝、稍微放大
+    const fs = seg.focus || []; let card = -1;
+    for (const f of fs){ if (t >= f.t0 - .05 && t < f.t1 + .1) card = f.card; }
+    R.gcs.forEach((el, k) => {
+      const c = backOut((ts - .8 - k*.1) / .4);
+      const on = k === card; if (el.classList.contains('on') !== on) el.classList.toggle('on', on); SIG.push(on ? 1 : 0);
+      css(el, 'opacity', String(r3(clamp((ts - .8 - k*.1)/.15, 0, 1))));
+      css(el, 'transform', `scale(${r3(clamp(c, 0, 1.15) * (on ? 1.03 : 1))})`);
+    });
+    R.dots.forEach((d, k) => { const on = k === card; if (d.classList.contains('on') !== on) d.classList.toggle('on', on); SIG.push(on ? 1 : 0); });
+    // 配图
+    for (const M of R.media){
+      const m = M.m; let o = 0, s = .94;
+      if (t >= m.t0 - .01 && t < m.t1 + .3){ const inA = easeOut((t - m.t0)/.3); o = t < m.t1 ? inA : easeOut(clamp(1 - (t - m.t1)/.3, 0, 1)); s = .94 + .06*inA; }
+      css(M.el, 'opacity', String(r3(o))); css(M.el, 'transform', `scale(${r3(s)}) rotate(${r3((1-o)*-1.5)}deg)`);
+      if (o > 0 && M.img){ const kb = 1 + .04*clamp((t - m.t0)/Math.max(1, m.t1 - m.t0), 0, 1); css(M.img, 'transform', `scale(${r3(kb)})`); }
+    }
+  } else if (seg.type === 'intro'){
+    R.rows.forEach((el, k) => { const c = easeOut((ts - .7 - k*.12)/.4); css(el, 'opacity', String(r3(c))); css(el, 'transform', `translateX(${r1((1-c)*50)}px)`); });
+  }
+  // 顶部章节条：已讲完的变深、当前高亮并显示进度
+  progEls.forEach((e, k) => {
+    const st = k < i ? 'done' : k === i ? 'on' : '';
+    if (e.__st !== st){ e.classList.toggle('done', st === 'done'); e.classList.toggle('on', st === 'on'); e.__st = st; }
+    css(e.firstChild, 'width', k === i ? Math.round(clamp(ts / dur, 0, 1) * 50) * 2 + '%' : '0%');
+  });
+  // 字幕
+  const subEl = $('#sub'); let cue = null;
+  for (const c of (seg.cues || [])){ if (t >= c.t0 && t < c.t1){ cue = c; break; } }
+  if (cue){ if (subEl.__t !== cue.text){ subEl.innerHTML = markNums(cue.text); subEl.__t = cue.text; } css(subEl, 'opacity', String(r3(clamp((t - cue.t0)/.08, 0, 1)))); SIG.push(cue.text); }
+  else css(subEl, 'opacity', '0');
+  // 主持人：换条时轻轻跳一下；说话时换嘴型、定时眨眼、轻微呼吸
+  const pose = seg.pose || 'idle';
+  const mo = mouthAt(t); const bl = blinkAt(t) && mo === 0;
+  let key = bl ? `${pose}-b` : `${pose}-${mo}`;
+  if (!HOSTIMG[key]) key = HOSTIMG[`${pose}-0`] ? `${pose}-0` : (HOSTIMG[`idle-${mo}`] ? `idle-${mo}` : 'idle-0');
+  for (const k in HOSTIMG){ const on = k === key; if (HOSTIMG[k].classList.contains('on') !== on) HOSTIMG[k].classList.toggle('on', on); }
+  SIG.push(key);
+  const hop = ts < .5 ? Math.sin(clamp(ts / .5, 0, 1) * Math.PI) * 26 : 0;
+  const breathe = Math.round(Math.sin(t * 2 * Math.PI / 2.6) * 3);
+  css($('#host'), 'transform', `translateY(${Math.round(-hop + breathe)}px)`);
+  // 头顶小气泡：换条后 0.6 秒弹出，停 1.6 秒
+  const em = seg.emote || '';
+  const eA = em ? Math.min(backOut((ts - .6) / .3), clamp((2.4 - ts) / .25, 0, 1)) : 0;
+  if ($('#emote').textContent !== em) $('#emote').textContent = em;
+  css($('#emote'), 'opacity', String(r3(clamp(eA, 0, 1)))); css($('#emote'), 'transform', `scale(${r3(clamp(eA, 0, 1.2))})`);
+  // 点评气泡
+  const bA = seg.comment ? backOut((ts - 1.0) / .4) : 0;
+  css($('#bub'), 'opacity', String(r3(clamp((ts - 1.0)/.15, 0, 1) * (seg.comment ? 1 : 0)))); css($('#bub'), 'transform', `scale(${r3(clamp(bA, 0, 1.15))})`);
+  return SIG.join('|');
+};
+</script>
+</body>
+</html>

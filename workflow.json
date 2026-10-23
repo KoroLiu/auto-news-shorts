@@ -1,0 +1,5 @@
+{
+  "collectReview": true,
+  "editReview": true,
+  "_doc": "Review switches (also editable in the workbench). collectReview: stop after collection + AI topic selection. editReview: stop after writing and after voice-over. --auto ignores both."
+}
