@@ -44,7 +44,7 @@ npm run setup
 LLM_API_KEY=sk-...
 ```
 
-默认用 DeepSeek（`https://api.deepseek.com`）：`deepseek-v4-pro` 写稿，`deepseek-flash` 看图挑配图（`LLM_VISION_MODEL`），会扔掉库存图和无关截图。想换别家，设置 `LLM_BASE_URL`、`LLM_MODEL`、`LLM_VISION_MODEL`；那家没有看图模型就把 `LLM_VISION_MODEL` 留空，跳过看图。
+默认用 DeepSeek（`https://api.deepseek.com`）：`deepseek-flash` 写稿，也用它看图挑配图（`LLM_VISION_MODEL`），会扔掉库存图和无关截图。想用更大的模型，设置 `LLM_MODEL=deepseek-v4-pro`，每个 token 贵好几倍。想换别家，设置 `LLM_BASE_URL`、`LLM_MODEL`、`LLM_VISION_MODEL`；那家没有看图模型就把 `LLM_VISION_MODEL` 留空，跳过看图。
 
 然后做一期：
 

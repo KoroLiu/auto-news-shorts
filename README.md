@@ -67,7 +67,7 @@ Give the pipeline an LLM key. Copy `.env.example` to `.env` and fill in:
 LLM_API_KEY=sk-...
 ```
 
-The default endpoint is DeepSeek (`https://api.deepseek.com`): `deepseek-v4-pro` writes, and `deepseek-flash` checks the pictures (`LLM_VISION_MODEL`), which drops stock photos and unrelated screenshots. Any OpenAI-compatible service works; set `LLM_BASE_URL`, `LLM_MODEL` and `LLM_VISION_MODEL` for another one. Leave `LLM_VISION_MODEL` empty if it has no vision model.
+The default endpoint is DeepSeek (`https://api.deepseek.com`): `deepseek-flash` writes the scripts and also checks the pictures (`LLM_VISION_MODEL`), which drops stock photos and unrelated screenshots. Set `LLM_MODEL=deepseek-v4-pro` for the larger model; it costs several times more per token. Any OpenAI-compatible service works; set `LLM_BASE_URL`, `LLM_MODEL` and `LLM_VISION_MODEL` for another one. Leave `LLM_VISION_MODEL` empty if it has no vision model.
 
 Then make an episode:
 

@@ -168,7 +168,7 @@
     "_doc": "Text model for topic selection and script writing. provider: openai = any OpenAI-compatible API (default; DeepSeek shown, see https://api-docs.deepseek.com) | codex (Codex CLI) | antigravity (agy CLI). The key is read from config.local.json llm.apiKey, or env LLM_API_KEY. Env LLM_BASE_URL / LLM_MODEL override baseUrl / model. vision: OpenAI-compatible model that reads images to drop unrelated pictures; usually set with env LLM_VISION_MODEL (default in .env.example: deepseek-flash), reusing baseUrl and key; or {baseUrl, model, apiKeyEnv} here. Not set = skip that check. fallback: another provider to try when the main one fails (\"\" = none). batchSize/concurrency: stories per request / requests in parallel.",
     "provider": "openai",
     "baseUrl": "https://api.deepseek.com",
-    "model": "deepseek-v4-pro",
+    "model": "deepseek-flash",
     "reasoningEffort": "high",
     "apiKeyEnv": "LLM_API_KEY",
     "vision": null,
